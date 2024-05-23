@@ -15,12 +15,13 @@ struct ChatNavigationModifier: ViewModifier {
     let title: String
     let status: String?
     let cover: URL?
+    var hasBack: Bool = true
     
     func body(content: Content) -> some View {
         content
             .navigationBarBackButtonHidden()
             .toolbar {
-                backButton
+                if hasBack { backButton }
                 infoToolbarItem
             }
     }

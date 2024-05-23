@@ -493,10 +493,10 @@ public extension ChatView {
         return view
     }
 
-    func chatNavigation(title: String, status: String? = nil, cover: URL? = nil) -> some View {
+    func chatNavigation(title: String, status: String? = nil, cover: URL? = nil, hasBackButton: Bool = true) -> some View {
         var view = self
         view.chatTitle = title
-        return view.modifier(ChatNavigationModifier(title: title, status: status, cover: cover))
+        return view.modifier(ChatNavigationModifier(title: title, status: status, cover: cover, hasBack: hasBackButton))
     }
 
     func showMessageTimeView(_ isShow: Bool) -> ChatView {
