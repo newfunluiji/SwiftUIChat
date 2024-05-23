@@ -37,7 +37,9 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
 
     /// User and MessageId
     public typealias TapAvatarClosure = (User, String) -> ()
-
+    
+    public typealias TapSuggestionClosure = (Suggestion) -> ()
+    
     @Environment(\.safeAreaInsets) private var safeAreaInsets
     @Environment(\.chatTheme) private var theme
     @Environment(\.mediaPickerTheme) private var pickerTheme
@@ -45,6 +47,7 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
     // MARK: - Parameters
 
     private let sections: [MessagesSection]
+    private let suggestions: [Suggestion]
     private let ids: [String]
     private let didSendMessage: (DraftMessage) -> Void
 
@@ -64,6 +67,7 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
     var messageUseMarkdown: Bool = false
     var showMessageMenuOnLongPress: Bool = true
     var tapAvatarClosure: TapAvatarClosure?
+    var tapSuggestionClosure: TapSuggestionClosure?
     var mediaPickerSelectionParameters: MediaPickerParameters?
     var orientationHandler: MediaPickerOrientationHandler = {_ in}
     var chatTitle: String?
@@ -94,10 +98,12 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
     @State private var menuScrollView: UIScrollView?
 
     public init(messages: [Message],
+                suggestions: [Suggestion] = [],
                 didSendMessage: @escaping (DraftMessage) -> Void,
                 messageBuilder: @escaping MessageBuilderClosure,
                 inputViewBuilder: @escaping InputViewBuilderClosure) {
         self.didSendMessage = didSendMessage
+        self.suggestions = suggestions
         self.sections = ChatView.mapMessages(messages)
         self.ids = messages.map { $0.id }
         self.messageBuilder = messageBuilder
@@ -126,7 +132,21 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
                         .padding(8)
                     }
                 }
-
+                if sections.isEmpty {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 180), spacing: 4), GridItem(.adaptive(minimum: 180), spacing: 4)]) {
+                        ForEach((suggestions), id: \.self) {
+                            SuggestionView(
+                                viewModel: viewModel,
+                                suggestion: $0,
+                                tapSuggestionClosure: tapSuggestionClosure,
+                                messageUseMarkdown: true,
+                                font: UIFontMetrics.default.scaledFont(for: UIFont.systemFont(ofSize: 15))
+                            )
+    //                        .frame(minWidth: .infinity)
+                        }
+                    }
+                    
+                }
                 inputView
 
             case .comments:
@@ -441,6 +461,12 @@ public extension ChatView {
         return view
     }
 
+    func tapSuggestionClosure(_ closure: @escaping TapSuggestionClosure) -> ChatView {
+        var view = self
+        view.tapSuggestionClosure = closure
+        return view
+    }
+
     func assetsPickerLimit(assetsPickerLimit: Int) -> ChatView {
         var view = self
         view.mediaPickerSelectionParameters = MediaPickerParameters()
@@ -495,9 +521,11 @@ public extension ChatView {
 public extension ChatView where MessageContent == EmptyView {
 
     init(messages: [Message],
+         suggestions: [Suggestion] = [],
          didSendMessage: @escaping (DraftMessage) -> Void,
          inputViewBuilder: @escaping InputViewBuilderClosure) {
         self.didSendMessage = didSendMessage
+        self.suggestions = suggestions
         self.sections = ChatView.mapMessages(messages)
         self.ids = messages.map { $0.id }
         self.inputViewBuilder = inputViewBuilder
@@ -507,9 +535,11 @@ public extension ChatView where MessageContent == EmptyView {
 public extension ChatView where InputViewContent == EmptyView {
 
     init(messages: [Message],
+         suggestions: [Suggestion] = [],
          didSendMessage: @escaping (DraftMessage) -> Void,
          messageBuilder: @escaping MessageBuilderClosure) {
         self.didSendMessage = didSendMessage
+        self.suggestions = suggestions
         self.sections = ChatView.mapMessages(messages)
         self.ids = messages.map { $0.id }
         self.messageBuilder = messageBuilder
@@ -519,8 +549,10 @@ public extension ChatView where InputViewContent == EmptyView {
 public extension ChatView where MessageContent == EmptyView, InputViewContent == EmptyView {
 
     init(messages: [Message],
+         suggestions: [Suggestion] = [],
          didSendMessage: @escaping (DraftMessage) -> Void) {
         self.didSendMessage = didSendMessage
+        self.suggestions = suggestions
         self.sections = ChatView.mapMessages(messages)
         self.ids = messages.map { $0.id }
     }
