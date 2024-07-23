@@ -20,9 +20,9 @@ struct TextInputView: View {
             .customFocus($globalFocusState.focus, equals: .uuid(inputFieldId))
             .placeholder(when: text.isEmpty) {
                 Text(style.placeholder)
-                    .foregroundColor(theme.colors.buttonBackground)
+                    .foregroundColor(.black)
             }
-            .foregroundColor(style == .message ? theme.colors.textLightContext : theme.colors.textDarkContext)
+            .foregroundColor(style == .message ? .black : theme.colors.textDarkContext)
             .padding(.vertical, 10)
             .padding(.leading, availableInput == .textAndAudio ? 12 : 0)
             .onTapGesture {

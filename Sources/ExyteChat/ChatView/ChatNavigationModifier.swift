@@ -30,6 +30,8 @@ struct ChatNavigationModifier: ViewModifier {
         ToolbarItem(placement: .navigationBarLeading) {
             Button { presentationMode.wrappedValue.dismiss() } label: {
                 theme.images.backButton
+                    .renderingMode(.template)
+                    .foregroundColor(theme.colors.textDarkContext)
             }
         }
     }
@@ -56,7 +58,7 @@ struct ChatNavigationModifier: ViewModifier {
                     Text(title)
                         .fontWeight(.semibold)
                         .font(.headline)
-                        .foregroundColor(theme.colors.textLightContext)
+                        .foregroundColor(theme.colors.textDarkContext)
                     if let status = status {
                         Text(status)
                             .font(.footnote)

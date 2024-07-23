@@ -46,6 +46,7 @@ struct SuggestionView: View {
                 }
                 .padding(.vertical, 4)
                 .font(Font(font))
+                .background(theme.colors.mainBackground)
                 Spacer()
             }
         }
@@ -58,7 +59,7 @@ extension View {
     func bubbleBackground(_ suggestion: Suggestion, theme: ChatTheme, isReply: Bool = false) -> some View {
         let radius: CGFloat = 10
         self
-            .foregroundColor(theme.colors.textLightContext)
+            .foregroundColor(theme.colors.textDarkContext)
             .background {
                 if !suggestion.label.isEmpty {
                     RoundedRectangle(cornerRadius: radius)
