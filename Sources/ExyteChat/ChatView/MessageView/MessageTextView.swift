@@ -23,8 +23,14 @@ struct MessageTextView: View {
         if messageUseMarkdown,
            let attributed = try? AttributedString(markdown: text, options: String.markdownOptions) {
             Text(attributed)
+            .contextMenu(ContextMenu(menuItems: {
+              Button("Copy", action: {
+                UIPasteboard.general.string = text
+              })
+            }))
         } else {
             Text(text)
+                .textSelection(.enabled)
         }
     }
 }

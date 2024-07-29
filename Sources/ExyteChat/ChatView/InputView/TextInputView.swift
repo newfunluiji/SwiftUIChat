@@ -19,7 +19,7 @@ struct TextInputView: View {
         TextField("", text: $text, axis: .vertical)
             .customFocus($globalFocusState.focus, equals: .uuid(inputFieldId))
             .placeholder(when: text.isEmpty) {
-                Text(style.placeholder)
+                Text(LocalizedStringKey(style.placeholder))
                     .foregroundColor(.black)
             }
             .foregroundColor(style == .message ? .black : theme.colors.textDarkContext)
@@ -28,5 +28,6 @@ struct TextInputView: View {
             .onTapGesture {
                 globalFocusState.focus = .uuid(inputFieldId)
             }
+            .textSelection(.enabled)
     }
 }

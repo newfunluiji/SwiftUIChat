@@ -12,6 +12,7 @@ final class InputViewModel: ObservableObject {
     @Published var state: InputViewState = .empty
 
     @Published var showPicker = false
+    @Published var attachmentsMode = AttachmentsMode.photos
     @Published var mediaPickerMode = MediaPickerMode.photos
 
     @Published var showActivityIndicator = false
@@ -58,11 +59,17 @@ final class InputViewModel: ObservableObject {
         switch action {
         case .photo:
             mediaPickerMode = .photos
+            attachmentsMode = .photos
             showPicker = true
         case .add:
             mediaPickerMode = .camera
+            attachmentsMode = .camera
         case .camera:
             mediaPickerMode = .camera
+            attachmentsMode = .camera
+            showPicker = true
+        case .document:
+            attachmentsMode = .documents
             showPicker = true
         case .send:
             send()
@@ -194,6 +201,7 @@ private extension InputViewModel {
                 DraftMessage(
                     text: attachments.text,
                     medias: attachments.medias,
+                    files: attachments.files,
                     recording: attachments.recording,
                     replyMessage: attachments.replyMessage,
                     createdAt: Date()

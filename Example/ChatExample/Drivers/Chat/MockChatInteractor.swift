@@ -46,6 +46,7 @@ final class MockChatInteractor: ChatInteractorProtocol {
             }
             chatState.value.remove(at: index)
         }
+        print(draftMessage.medias.first)
 
         Task {
             var status: Message.Status = .sending

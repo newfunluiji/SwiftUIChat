@@ -35,6 +35,7 @@ public enum InputViewAction {
     case deleteRecord
     case playRecord
     case pauseRecord
+    case document
     //    case location
     //    case document
 }
@@ -66,6 +67,7 @@ public enum AvailableInputType {
 public struct InputViewAttachments {
     public var text: String = ""
     public var medias: [Media] = []
+    public var files: [URL] = []
     public var recording: Recording?
     public var replyMessage: ReplyMessage?
 }
@@ -109,7 +111,7 @@ struct InputView: View {
                 HStack(alignment: .bottom, spacing: 0) {
                     leftView
                     middleView
-                    rightView
+//                    rightView
                 }
                 .background {
                     RoundedRectangle(cornerRadius: 18)
@@ -135,7 +137,8 @@ struct InputView: View {
             switch style {
             case .message:
                 if availableInput == .full {
-                    attachButton
+//                    attachButton
+                    addAttachmentButton
                 }
             case .signature:
                 if viewModel.mediaPickerMode == .cameraSelection {
@@ -194,12 +197,12 @@ struct InputView: View {
                     .foregroundColor(theme.colors.sendButtonBackground)
             }
             Group {
-                if state.canSend {
+//                if state.canSend {
                     sendButton
-                } else {
-                    recordButton
-                        .highPriorityGesture(dragGesture())
-                }
+//                } else {
+//                    recordButton
+//                        .highPriorityGesture(dragGesture())
+//                }
             }
             .compositingGroup()
             .overlay(alignment: .top) {
@@ -301,6 +304,31 @@ struct InputView: View {
         }
     }
 
+    var addAttachmentButton: some View {
+        Menu {
+            Button {
+                onAction(.camera)
+            } label: {
+                Label("Camera", systemImage: "camera")
+            }
+            Button {
+                onAction(.photo)
+            } label: {
+                Label("Photos", systemImage: "photo.stack")
+            }
+            Button {
+                onAction(.document)
+            } label: {
+                Label("Files", systemImage: "folder")
+            }
+        } label: {
+            theme.images.inputView.add
+                .viewSize(24)
+                .circleBackground(theme.colors.addButtonBackground)
+                .padding(EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 8))
+        }
+    }
+
     var cameraButton: some View {
         Button {
             onAction(.camera)
@@ -319,6 +347,7 @@ struct InputView: View {
                 .viewSize(48)
                 .circleBackground(theme.colors.sendButtonBackground)
         }
+        .disabled(!state.canSend)
     }
 
     var recordButton: some View {

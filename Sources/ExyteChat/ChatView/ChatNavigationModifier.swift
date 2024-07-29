@@ -60,7 +60,7 @@ struct ChatNavigationModifier: ViewModifier {
                         .font(.headline)
                         .foregroundColor(theme.colors.textDarkContext)
                     if let status = status {
-                        Text(status)
+                        Text(NSLocalizedString(status, comment: status))
                             .font(.footnote)
                             .foregroundColor(theme.colors.grayStatus)
                     }

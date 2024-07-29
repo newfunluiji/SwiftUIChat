@@ -9,6 +9,8 @@ import SwiftUI
 import FloatingButton
 import SwiftUIIntrospect
 import ExyteMediaPicker
+import FilePicker
+
 
 public typealias MediaPickerParameters = SelectionParamsHolder
 
@@ -175,8 +177,16 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
             }
         }
         .fullScreenCover(isPresented: $inputViewModel.showPicker) {
-            AttachmentsEditor(inputViewModel: inputViewModel, inputViewBuilder: inputViewBuilder, chatTitle: chatTitle, messageUseMarkdown: messageUseMarkdown, orientationHandler: orientationHandler, mediaPickerSelectionParameters: mediaPickerSelectionParameters, availableInput: availablelInput)
-                .environmentObject(globalFocusState)
+            if inputViewModel.attachmentsMode == .documents {
+                FilePickerUIRepresentable(types: [.item], allowMultiple: true){ urls in
+                    inputViewModel.attachments.files = urls
+                    print("selected \(urls.count) files")
+                    inputViewModel.send()
+                }
+            } else {
+                AttachmentsEditor(inputViewModel: inputViewModel, inputViewBuilder: inputViewBuilder, chatTitle: chatTitle, messageUseMarkdown: messageUseMarkdown, orientationHandler: orientationHandler, mediaPickerSelectionParameters: mediaPickerSelectionParameters, availableInput: availablelInput)
+                    .environmentObject(globalFocusState)
+            }
         }
         .onChange(of: inputViewModel.showPicker) {
             if $0 {
