@@ -29,5 +29,7 @@ struct TextInputView: View {
                 globalFocusState.focus = .uuid(inputFieldId)
             }
             .textSelection(.enabled)
+            .padding(.leading)
+
     }
 }
