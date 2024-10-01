@@ -75,6 +75,7 @@ struct AttachmentsEditor<InputViewContent: View>: View {
             .didPressCancelCamera {
                 inputViewModel.showPicker = false
             }
+            .mediaSelectionLimit(1)
             .currentFullscreenMedia($currentFullscreenMedia)
             .showLiveCameraCell()
             .setSelectionParameters(mediaPickerSelectionParameters)

@@ -179,7 +179,7 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
         }
         .fullScreenCover(isPresented: $inputViewModel.showPicker) {
             if inputViewModel.attachmentsMode == .documents {
-                FilePickerUIRepresentable(types: [.item], allowMultiple: true){ urls in
+                FilePickerUIRepresentable(types: [.item], allowMultiple: false){ urls in
                     inputViewModel.attachments.files = urls
                     print("selected \(urls.count) files")
                     inputViewModel.send()
