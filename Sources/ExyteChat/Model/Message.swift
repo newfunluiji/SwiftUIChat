@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import QuickLookThumbnailing
 
 public struct Message: Identifiable, Hashable {
 
@@ -93,8 +94,18 @@ public struct Message: Identifiable, Hashable {
                     return Attachment(id: UUID().uuidString, thumbnail: thumbnailURL, full: fullURL, type: .video)
                 }
             }
-
-            return Message(id: id, user: user, status: status, createdAt: draft.createdAt, text: draft.text, attachments: attachments, recording: draft.recording, replyMessage: draft.replyMessage)
+            let fileAttachments = await draft.files.asyncCompactMap { fileUrl -> Attachment? in
+                let file = File(url: fileUrl)
+                guard let thumbnailURL = await file.getThumbnailURL() else {
+                    return nil
+                }
+                guard let fullURL = await file.getURL() else {
+                    return nil
+                }
+                return Attachment(id: UUID().uuidString, thumbnail: thumbnailURL, full: fullURL, type: .file)
+            }
+            
+            return Message(id: id, user: user, status: status, createdAt: draft.createdAt, text: draft.text, attachments: attachments + fileAttachments, recording: draft.recording, replyMessage: draft.replyMessage)
         }
 }
 
@@ -156,5 +167,63 @@ public extension Message {
 
     func toReplyMessage() -> ReplyMessage {
         ReplyMessage(id: id, user: user, text: text, attachments: attachments, recording: recording)
+    }
+}
+
+public struct File: Identifiable, Equatable {
+    public var id = UUID()
+    public var url: URL
+    public init(id: UUID = UUID(), url: URL) {
+        self.id = id
+        self.url = url
+    }
+    public static func == (lhs: File, rhs: File) -> Bool {
+        lhs.id == rhs.id
+    }
+}
+public extension File {
+
+    func getURL() async -> URL? {
+        url
+    }
+
+    public func getThumbnailURL() async -> URL? {
+        do {
+            return try await generateThumbnailFromFileAndSave(at: url, size: CGSize(width: 300, height: 300))
+        } catch {
+            print("error generating")
+        }
+        return nil
+    }
+}
+func generateThumbnailFromFileAndSave(at url: URL, size: CGSize) async throws -> URL? {
+    let request = await QLThumbnailGenerator.Request(fileAt: url, size: size, scale: UIScreen.main.scale, representationTypes: .thumbnail)
+
+    // Specify the generic type explicitly for continuation
+    let thumbnail: UIImage? = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<UIImage?, Error>) in
+        QLThumbnailGenerator.shared.generateBestRepresentation(for: request) { (thumbnail, error) in
+            if let error = error {
+                continuation.resume(throwing: error) // Resume with error if something went wrong
+            } else if let thumbnail = thumbnail {
+                continuation.resume(returning: thumbnail.uiImage) // Resume with the generated image
+            } else {
+                continuation.resume(returning: nil) // If no thumbnail is available, return nil
+            }
+        }
+    }
+
+    guard let thumbnailImage = thumbnail else {
+        return nil
+    }
+
+    // Save the image to the temporary directory
+    let tempDirectory = FileManager.default.temporaryDirectory
+    let thumbnailURL = tempDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("png")
+
+    if let data = thumbnailImage.pngData() {
+        try data.write(to: thumbnailURL)
+        return thumbnailURL
+    } else {
+        return nil
     }
 }

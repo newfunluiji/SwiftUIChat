@@ -23,6 +23,21 @@ struct AttachmentCell: View {
                             .foregroundColor(.white)
                             .frame(width: 36, height: 36)
                     }
+            } else if attachment.type == .file {
+                content
+//                    .overlay (
+//                        VStack {
+//                            Spacer()
+//                            HStack {
+//                                Image(systemName: "doc")
+//                                    .fixedSize(horizontal: false, vertical: false)
+//                                    .foregroundColor(theme.colors.textLightContext.opacity(0.8))
+//                                Spacer()
+//                            }
+//                        }
+//                        .padding(),
+//                        alignment: .bottomLeading
+//                    )
             } else {
                 content
                     .overlay {
@@ -59,5 +74,6 @@ struct AsyncImageView: View {
                 ActivityIndicator(size: 30, showBackground: false)
             }
         }
+//        .background(theme.colors.grayStatus)
     }
 }

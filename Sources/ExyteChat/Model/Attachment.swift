@@ -6,11 +6,14 @@ import Foundation
 import ExyteMediaPicker
 
 public enum AttachmentType: String, Codable {
+    case file
     case image
     case video
 
     public var title: String {
         switch self {
+        case .file:
+            return "File"
         case .image:
             return "Image"
         default:
@@ -24,6 +27,19 @@ public enum AttachmentType: String, Codable {
             self = .image
         default:
             self = .video
+        }
+    }
+    
+    public init(type: String) {
+        switch type.lowercased() {
+        case "file":
+            self = .file
+        case "image":
+            self = .image
+        case "video":
+            self = .video
+        default:
+            self = .file // Set a default case if none matches
         }
     }
 }

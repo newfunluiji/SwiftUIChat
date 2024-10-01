@@ -25,6 +25,17 @@ struct AttachmentsPage: View {
             }
         } else if attachment.type == .video {
             VideoView(viewModel: VideoViewModel(attachment: attachment))
+        } else if attachment.type == .file {
+            CachedAsyncImage(url: attachment.thumbnail, urlCache: .imageCache) { phase in
+                switch phase {
+                case let .success(image):
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                default:
+                    ActivityIndicator()
+                }
+            }
         } else {
             Rectangle()
                 .foregroundColor(Color.gray)
