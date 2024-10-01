@@ -109,7 +109,9 @@ struct InputView: View {
             viewOnTop
             HStack(alignment: .bottom, spacing: 10) {
                 HStack(alignment: .bottom, spacing: 0) {
-//                    leftView
+                    if viewModel.showLeftView {
+                        leftView
+                    }
                     middleView
 //                    rightView
                 }

@@ -55,12 +55,12 @@ struct ChatNavigationModifier: ViewModifier {
                 }
                 
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(title)
+                    Text(LocalizedStringKey(title))
                         .fontWeight(.semibold)
                         .font(.headline)
                         .foregroundColor(theme.colors.textDarkContext)
                     if let status = status {
-                        Text(NSLocalizedString(status, comment: status))
+                        Text(LocalizedStringKey(status))
                             .font(.footnote)
                             .foregroundColor(theme.colors.grayStatus)
                     }

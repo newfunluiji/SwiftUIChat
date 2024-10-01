@@ -67,6 +67,7 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
     var showDateHeaders: Bool = true
     var avatarSize: CGFloat = 32
     var messageUseMarkdown: Bool = false
+    var showUploadFilesView: Bool = false
     var showMessageMenuOnLongPress: Bool = true
     var tapAvatarClosure: TapAvatarClosure?
     var tapSuggestionClosure: TapSuggestionClosure?
@@ -279,6 +280,7 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
         }
         .onAppear {
             viewModel.didSendMessage = didSendMessage
+            inputViewModel.showLeftView = showUploadFilesView
             inputViewModel.didSendMessage = { value in
                 didSendMessage(value)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
@@ -291,6 +293,7 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
     var inputView: some View {
         Group {
             if let inputViewBuilder = inputViewBuilder {
+                //TODO:: add showUploadFilesView
                 inputViewBuilder($inputViewModel.attachments.text, inputViewModel.attachments, inputViewModel.state, .message, inputViewModel.inputViewAction()) {
                     globalFocusState.focus = nil
                 }
@@ -456,6 +459,12 @@ public extension ChatView {
     func messageUseMarkdown(messageUseMarkdown: Bool) -> ChatView {
         var view = self
         view.messageUseMarkdown = messageUseMarkdown
+        return view
+    }
+    
+    func showUploadFilesView(showUploadFilesView: Bool) -> ChatView {
+        var view = self
+        view.showUploadFilesView = showUploadFilesView
         return view
     }
 
