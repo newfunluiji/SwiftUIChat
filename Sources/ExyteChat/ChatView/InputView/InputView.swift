@@ -82,6 +82,7 @@ struct InputView: View {
     var style: InputViewStyle
     var availableInput: AvailableInputType
     var messageUseMarkdown: Bool
+    var inputViewTheme = InputViewTheme.default
 
     @StateObject var recordingPlayer = RecordingPlayer()
 
@@ -114,13 +115,14 @@ struct InputView: View {
                     }
                     middleView
 //                    rightView
+                    rigthOutsideButton
                 }
                 .background {
                     RoundedRectangle(cornerRadius: 18)
                         .fill(fieldBackgroundColor)
                 }
 
-                rigthOutsideButton
+//                rigthOutsideButton
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
@@ -226,7 +228,7 @@ struct InputView: View {
     @ViewBuilder
     var viewOnTop: some View {
         if let message = viewModel.attachments.replyMessage {
-            VStack(spacing: 8) {
+            VStack(spacing: inputViewTheme.viewOnTop.horizontalSpacing) {
                 Rectangle()
                     .foregroundColor(theme.colors.friendMessage)
                     .frame(height: 2)
@@ -247,15 +249,15 @@ struct InputView: View {
                                 .foregroundColor(theme.colors.textLightContext)
                         }
                     }
-                    .padding(.vertical, 2)
+                    .padding(.vertical, inputViewTheme.viewOnTop.verticalPadding)
 
                     Spacer()
 
                     if let first = message.attachments.first {
                         AsyncImageView(url: first.thumbnail)
-                            .viewSize(30)
-                            .cornerRadius(4)
-                            .padding(.trailing, 16)
+                            .viewSize(inputViewTheme.viewOnTop.attachment.viewSize)
+                            .cornerRadius(inputViewTheme.viewOnTop.attachment.cornerRadius)
+                            .padding(.trailing, inputViewTheme.viewOnTop.attachment.trailingPadding)
                     }
 
                     if let _ = message.recording {
@@ -269,7 +271,7 @@ struct InputView: View {
                             viewModel.attachments.replyMessage = nil
                         }
                 }
-                .padding(.horizontal, 26)
+                .padding(.horizontal, inputViewTheme.viewOnTop.horizontalPadding)
             }
             .fixedSize(horizontal: false, vertical: true)
         }

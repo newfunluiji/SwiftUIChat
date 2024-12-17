@@ -318,3 +318,46 @@ public struct ChatTheme {
         }
     }
 }
+
+public struct InputViewTheme {
+    public let viewOnTop = ViewOnTop()
+    
+    public struct ViewOnTop {
+        public let horizontalSpacing: CGFloat
+        public let verticalPadding: CGFloat
+        public let horizontalPadding: CGFloat
+        public let attachment: Attachment
+        
+        public init(
+            horizontalSpacing: CGFloat = 8,
+            verticalPadding: CGFloat = 8,
+            horizontalPadding: CGFloat = 26,
+            attachment: Attachment = Attachment()
+        ) {
+            self.horizontalSpacing = horizontalSpacing
+            self.verticalPadding = verticalPadding
+            self.horizontalPadding = horizontalPadding
+            self.attachment = attachment
+        }
+        
+        public struct Attachment {
+            public let viewSize: CGFloat
+            public let cornerRadius: CGFloat
+            public let trailingPadding: CGFloat
+            
+            public init(
+                viewSize: CGFloat = 30,
+                cornerRadius: CGFloat = 4,
+                trailingPadding: CGFloat = 16
+            ) {
+                self.viewSize = viewSize
+                self.cornerRadius = cornerRadius
+                self.trailingPadding = trailingPadding
+            }
+        }
+    }
+}
+
+extension InputViewTheme {
+    static var `default`: InputViewTheme { .init() }
+}
