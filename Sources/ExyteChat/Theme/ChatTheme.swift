@@ -195,6 +195,7 @@ public struct ChatTheme {
         public var reply: Reply
 
         public init(
+            bundle: Bundle = .current,
             camera: Image? = nil,
             contact: Image? = nil,
             document: Image? = nil,
@@ -243,26 +244,26 @@ public struct ChatTheme {
             backButton: Image? = nil,
             scrollToBottom: Image? = nil
         ) {
-            self.backButton = backButton ?? Image("backArrow", bundle: .current)
-            self.scrollToBottom = scrollToBottom ?? Image("scrollToBottom", bundle: .current)
+            self.backButton = backButton ?? Image("backArrow", bundle: bundle)
+            self.scrollToBottom = scrollToBottom ?? Image("scrollToBottom", bundle: bundle)
 
             self.attachMenu = AttachMenu(
-                camera: camera ?? Image("camera", bundle: .current),
-                contact: contact ?? Image("contact", bundle: .current),
-                document: document ?? Image("document", bundle: .current),
-                location: location ?? Image("location", bundle: .current),
-                photo: photo ?? Image("photo", bundle: .current),
-                pickDocument: pickDocument ?? Image("pickDocument", bundle: .current),
-                pickLocation: pickLocation ?? Image("pickLocation", bundle: .current),
-                pickPhoto: pickPhoto ?? Image("pickPhoto", bundle: .current)
+                camera: camera ?? Image("camera", bundle: bundle),
+                contact: contact ?? Image("contact", bundle: bundle),
+                document: document ?? Image("document", bundle: bundle),
+                location: location ?? Image("location", bundle: bundle),
+                photo: photo ?? Image("photo", bundle: bundle),
+                pickDocument: pickDocument ?? Image("pickDocument", bundle: bundle),
+                pickLocation: pickLocation ?? Image("pickLocation", bundle: bundle),
+                pickPhoto: pickPhoto ?? Image("pickPhoto", bundle: bundle)
             )
 
             self.inputView = InputView(
-                add: add ?? Image("add", bundle: .current),
-                arrowSend: arrowSend ?? Image("arrowSend", bundle: .current),
-                attach: attach ?? Image("attach", bundle: .current),
-                attachCamera: attachCamera ?? Image("attachCamera", bundle: .current),
-                microphone: microphone ?? Image("microphone", bundle: .current)
+                add: add ?? Image("add", bundle: bundle),
+                arrowSend: arrowSend ?? Image("arrowSend", bundle: bundle),
+                attach: attach ?? Image("attach", bundle: bundle),
+                attachCamera: attachCamera ?? Image("attachCamera", bundle: bundle),
+                microphone: microphone ?? Image("microphone", bundle: bundle)
             )
 
             self.fullscreenMedia = FullscreenMedia(
@@ -273,46 +274,46 @@ public struct ChatTheme {
             )
 
             self.mediaPicker = MediaPicker(
-                chevronDown: chevronDown ?? Image("chevronDown", bundle: .current),
-                chevronRight: chevronRight ?? Image("chevronRight", bundle: .current),
-                cross: cross ?? Image("cross", bundle: .current)
+                chevronDown: chevronDown ?? Image("chevronDown", bundle: bundle),
+                chevronRight: chevronRight ?? Image("chevronRight", bundle: bundle),
+                cross: cross ?? Image("cross", bundle: bundle)
             )
 
             self.message = Message(
-                attachedDocument: attachedDocument ?? Image("attachedDocument", bundle: .current),
-                checkmarks: checkmarks ?? Image("checkmarks", bundle: .current),
-                error: error ?? Image("error", bundle: .current),
-                muteVideo: muteVideo ?? Image("muteVideo", bundle: .current),
-                pauseAudio: pauseAudio ?? Image("pauseAudio", bundle: .current),
+                attachedDocument: attachedDocument ?? Image("attachedDocument", bundle: bundle),
+                checkmarks: checkmarks ?? Image("checkmarks", bundle: bundle),
+                error: error ?? Image("error", bundle: bundle),
+                muteVideo: muteVideo ?? Image("muteVideo", bundle: bundle),
+                pauseAudio: pauseAudio ?? Image("pauseAudio", bundle: bundle),
                 pauseVideo: pauseVideo ?? Image(systemName: "pause.circle.fill"),
-                playAudio: playAudio ?? Image("playAudio", bundle: .current),
+                playAudio: playAudio ?? Image("playAudio", bundle: bundle),
                 playVideo: playVideo ?? Image(systemName: "play.circle.fill"),
-                sending: sending ?? Image("sending", bundle: .current)
+                sending: sending ?? Image("sending", bundle: bundle)
             )
 
             self.messageMenu = MessageMenu(
-                delete: delete ?? Image("delete", bundle: .current),
-                edit: edit ?? Image("edit", bundle: .current),
-                forward: forward ?? Image("forward", bundle: .current),
-                reply: reply ?? Image("reply", bundle: .current),
-                retry: retry ?? Image("retry", bundle: .current),
-                save: save ?? Image("save", bundle: .current),
-                select: select ?? Image("select", bundle: .current)
+                delete: delete ?? Image("delete", bundle: bundle),
+                edit: edit ?? Image("edit", bundle: bundle),
+                forward: forward ?? Image("forward", bundle: bundle),
+                reply: reply ?? Image("reply", bundle: bundle),
+                retry: retry ?? Image("retry", bundle: bundle),
+                save: save ?? Image("save", bundle: bundle),
+                select: select ?? Image("select", bundle: bundle)
             )
 
             self.recordAudio = RecordAudio(
-                cancelRecord: cancelRecord ?? Image("cancelRecord", bundle: .current),
-                deleteRecord: deleteRecord ?? Image("deleteRecord", bundle: .current),
-                lockRecord: lockRecord ?? Image("lockRecord", bundle: .current),
-                pauseRecord: pauseRecord ?? Image("pauseRecord", bundle: .current),
-                playRecord: playRecord ?? Image("playRecord", bundle: .current),
-                sendRecord: sendRecord ?? Image("sendRecord", bundle: .current),
-                stopRecord: stopRecord ?? Image("stopRecord", bundle: .current)
+                cancelRecord: cancelRecord ?? Image("cancelRecord", bundle: bundle),
+                deleteRecord: deleteRecord ?? Image("deleteRecord", bundle: bundle),
+                lockRecord: lockRecord ?? Image("lockRecord", bundle: bundle),
+                pauseRecord: pauseRecord ?? Image("pauseRecord", bundle: bundle),
+                playRecord: playRecord ?? Image("playRecord", bundle: bundle),
+                sendRecord: sendRecord ?? Image("sendRecord", bundle: bundle),
+                stopRecord: stopRecord ?? Image("stopRecord", bundle: bundle)
             )
 
             self.reply = Reply(
-                cancelReply: cancelReply ?? Image("cancelReply", bundle: .current),
-                replyToMessage: replyToMessage ?? Image("replyToMessage", bundle: .current)
+                cancelReply: cancelReply ?? Image("cancelReply", bundle: bundle),
+                replyToMessage: replyToMessage ?? Image("replyToMessage", bundle: bundle)
             )
         }
     }
