@@ -557,3 +557,49 @@ public struct InputViewTheme {
 extension InputViewTheme {
     static var `default`: InputViewTheme { .init() }
 }
+
+public struct SuggestionViewTheme {
+    public let bubble = BubbleTheme()
+    public let messagePadding: EdgeInsets
+    public let bubbleCornerRadius: CGFloat
+    public let bubbleSpacing: CGFloat
+    public let horizontalPadding: CGFloat
+    public let verticalPadding: CGFloat
+    public let fontSize: CGFloat
+
+    public init(
+        messagePadding: EdgeInsets = .init(top: 4, leading: 4, bottom: 4, trailing: 4),
+        bubbleCornerRadius: CGFloat = 10,
+        bubbleSpacing: CGFloat = 4,
+        horizontalPadding: CGFloat = 4,
+        verticalPadding: CGFloat = 2,
+        fontSize: CGFloat = 15
+    ) {
+        self.messagePadding = messagePadding
+        self.bubbleCornerRadius = bubbleCornerRadius
+        self.bubbleSpacing = bubbleSpacing
+        self.horizontalPadding = horizontalPadding
+        self.verticalPadding = verticalPadding
+        self.fontSize = fontSize
+    }
+
+    // MARK: - Bubble Theme
+    public struct BubbleTheme {
+        public let backgroundOpacity: Double
+        public let borderWidth: CGFloat
+        public let borderColor: Color
+
+        public init(
+            backgroundOpacity: Double = 1.0,
+            borderWidth: CGFloat = 1,
+            borderColor: Color = .gray
+        ) {
+            self.backgroundOpacity = backgroundOpacity
+            self.borderWidth = borderWidth
+            self.borderColor = borderColor
+        }
+    }
+}
+extension SuggestionViewTheme {
+    static var `default`: SuggestionViewTheme { .init() }
+}

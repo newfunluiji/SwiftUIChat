@@ -8,15 +8,14 @@
 import SwiftUI
 
 struct SuggestionView: View {
-
     @Environment(\.chatTheme) private var theme
-
     @ObservedObject var viewModel: ChatViewModel
-
     let suggestion: Suggestion
     let tapSuggestionClosure: ChatView.TapSuggestionClosure?
     let messageUseMarkdown: Bool
     var font: UIFont
+    var themeView: SuggestionViewTheme = .default 
+
     var body: some View {
         HStack(alignment: .center, spacing: 0) {
             VStack(alignment: .center, spacing: 0) {
@@ -24,8 +23,7 @@ struct SuggestionView: View {
                     .onTapGesture {
                         tapSuggestionClosure?(suggestion)
                     }
-                    .padding(.top, 2)
-                    
+                    .padding(.top, themeView.verticalPadding)
             }
         }
         .frame(maxWidth: UIScreen.main.bounds.width, alignment: .center)
@@ -37,42 +35,41 @@ struct SuggestionView: View {
             if !suggestion.label.isEmpty {
                 let messageView = MessageTextView(text: suggestion.label, messageUseMarkdown: messageUseMarkdown)
                     .fixedSize(horizontal: false, vertical: false)
-                    .padding(.horizontal, 4)
+                    .padding(themeView.messagePadding)
                 Spacer()
-                HStack(alignment: .lastTextBaseline, spacing: 4) {
+                HStack(alignment: .lastTextBaseline, spacing: themeView.bubbleSpacing) {
                     Spacer()
                     messageView
                     Spacer()
                 }
-                .padding(.vertical, 4)
+                .padding(.horizontal, themeView.horizontalPadding)
+                .padding(.vertical, themeView.verticalPadding)
                 .font(Font(font))
                 .background(theme.colors.mainBackground)
                 Spacer()
             }
         }
-        .bubbleBackground(suggestion, theme: theme)
+        .bubbleBackground(suggestion, theme: theme, cornerRadius: themeView.bubbleCornerRadius)
     }
 }
-extension View {
 
+extension View {
     @ViewBuilder
-    func bubbleBackground(_ suggestion: Suggestion, theme: ChatTheme, isReply: Bool = false) -> some View {
-        let radius: CGFloat = 10
+    func bubbleBackground(_ suggestion: Suggestion, theme: ChatTheme, cornerRadius: CGFloat) -> some View {
         self
             .foregroundColor(theme.colors.textDarkContext)
             .background {
                 if !suggestion.label.isEmpty {
-                    RoundedRectangle(cornerRadius: radius)
+                    RoundedRectangle(cornerRadius: cornerRadius)
                         .foregroundColor(.clear)
                         .opacity(1)
                 }
             }
-            .cornerRadius(radius)
+            .cornerRadius(cornerRadius)
             .overlay {
-                RoundedRectangle(cornerRadius: radius)
-                    .stroke(.gray, lineWidth: 1)
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .stroke(Color.gray, lineWidth: 1)
             }
-
     }
 }
 
