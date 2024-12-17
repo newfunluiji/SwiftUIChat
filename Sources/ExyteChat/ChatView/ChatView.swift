@@ -317,8 +317,8 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
             isShowingMenu: $isShowingMenu,
             menuButtonsSize: $menuButtonsSize,
             alignment: row.message.user.isCurrentUser ? .right : .left,
-            leadingPadding: avatarSize + MessageView.horizontalAvatarPadding * 2,
-            trailingPadding: MessageView.statusViewSize + MessageView.horizontalStatusPadding) {
+            leadingPadding: avatarSize + theme.messageViewTheme.horizontalAvatarPadding * 2,
+            trailingPadding: theme.messageViewTheme.statusViewSize + theme.messageViewTheme.horizontalStatusPadding) {
                 ChatMessageView(viewModel: viewModel, messageBuilder: messageBuilder, row: row, chatType: type, avatarSize: avatarSize, tapAvatarClosure: nil, messageUseMarkdown: messageUseMarkdown, isDisplayingMessageMenu: true, showMessageTimeView: showMessageTimeView, messageFont: messageFont)
                     .onTapGesture {
                         hideMessageMenu()

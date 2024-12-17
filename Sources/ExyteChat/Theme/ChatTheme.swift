@@ -32,11 +32,15 @@ public extension View {
 public struct ChatTheme {
     public let colors: ChatTheme.Colors
     public let images: ChatTheme.Images
+    public let messageViewTheme: MessageViewTheme
+    
 
     public init(colors: ChatTheme.Colors = .init(),
-                images: ChatTheme.Images = .init()) {
+                images: ChatTheme.Images = .init(),
+                messageViewTheme: MessageViewTheme = .default) {
         self.colors = colors
         self.images = images
+        self.messageViewTheme = messageViewTheme
     }
 
     public struct Colors {
@@ -601,5 +605,162 @@ public struct SuggestionViewTheme {
     }
 }
 extension SuggestionViewTheme {
-    static var `default`: SuggestionViewTheme { .init() }
+    public static var `default`: SuggestionViewTheme { .init() }
+}
+
+public struct MessageViewTheme {
+    public let avatar: AvatarTheme
+    public let bubble: BubbleTheme
+    public let textWithTime: TextWithTimeTheme
+    public let recording: RecordingTheme
+    public let attachments: AttachmentsTheme
+    public let replyBubble: ReplyBubbleTheme
+    public let status: StatusTheme
+    public let widthWithMedia: CGFloat
+    public let horizontalAvatarPadding: CGFloat
+    public let horizontalTextPadding: CGFloat
+    public let horizontalAttachmentPadding: CGFloat
+    public let statusViewSize: CGFloat
+    public let horizontalStatusPadding: CGFloat
+    public let horizontalBubblePadding: CGFloat
+    public init(
+        avatar: AvatarTheme = .init(),
+        bubble: BubbleTheme = .init(),
+        textWithTime: TextWithTimeTheme = .init(),
+        recording: RecordingTheme = .init(),
+        attachments: AttachmentsTheme = .init(),
+        replyBubble: ReplyBubbleTheme = .init(),
+        status: StatusTheme = .init(),
+        widthWithMedia: CGFloat = 204,
+        horizontalAvatarPadding: CGFloat = 8,
+        horizontalTextPadding: CGFloat = 12,
+        horizontalAttachmentPadding: CGFloat = 1,
+        statusViewSize: CGFloat = 14,
+        horizontalStatusPadding: CGFloat = 8,
+        horizontalBubblePadding: CGFloat = 70
+    ) {
+        self.avatar = avatar
+        self.bubble = bubble
+        self.textWithTime = textWithTime
+        self.recording = recording
+        self.attachments = attachments
+        self.replyBubble = replyBubble
+        self.status = status
+        self.widthWithMedia = widthWithMedia
+        self.horizontalAvatarPadding = horizontalAvatarPadding
+        self.horizontalTextPadding = horizontalTextPadding
+        self.horizontalAttachmentPadding = horizontalAttachmentPadding
+        self.statusViewSize = statusViewSize
+        self.horizontalStatusPadding = horizontalStatusPadding
+        self.horizontalBubblePadding = horizontalBubblePadding
+        
+    }
+
+    // MARK: - Avatar Theme
+    public struct AvatarTheme {
+        public let size: CGFloat
+        public let horizontalPadding: CGFloat
+
+        public init(size: CGFloat = 40, horizontalPadding: CGFloat = 8) {
+            self.size = size
+            self.horizontalPadding = horizontalPadding
+        }
+    }
+
+    // MARK: - Bubble Theme
+    public struct BubbleTheme {
+        public let cornerRadius: CGFloat
+        public let paddingTop: CGFloat
+        public let paddingBottom: CGFloat
+
+        public init(
+            cornerRadius: CGFloat = 20,
+            paddingTop: CGFloat = 8,
+            paddingBottom: CGFloat = 4
+        ) {
+            self.cornerRadius = cornerRadius
+            self.paddingTop = paddingTop
+            self.paddingBottom = paddingBottom
+        }
+    }
+
+    // MARK: - Text with Time Theme
+    public struct TextWithTimeTheme {
+        public let font: Font
+        public let timeFont: Font
+        public let spacing: CGFloat
+        public let horizontalPadding: CGFloat
+        public let verticalPadding: CGFloat
+
+        public init(
+            font: Font = .body,
+            timeFont: Font = .caption2,
+            spacing: CGFloat = 12,
+            horizontalPadding: CGFloat = 12,
+            verticalPadding: CGFloat = 8
+        ) {
+            self.font = font
+            self.timeFont = timeFont
+            self.spacing = spacing
+            self.horizontalPadding = horizontalPadding
+            self.verticalPadding = verticalPadding
+        }
+    }
+
+    // MARK: - Recording Theme
+    public struct RecordingTheme {
+        public let padding: EdgeInsets
+
+        public init(
+            padding: EdgeInsets = .init(top: 8, leading: 12, bottom: 8, trailing: 12)
+        ) {
+            self.padding = padding
+        }
+    }
+
+    // MARK: - Attachments Theme
+    public struct AttachmentsTheme {
+        public let gridSpacing: CGFloat
+        public let padding: EdgeInsets
+
+        public init(
+            gridSpacing: CGFloat = 4,
+            padding: EdgeInsets = .init(top: 4, leading: 4, bottom: 4, trailing: 4)
+        ) {
+            self.gridSpacing = gridSpacing
+            self.padding = padding
+        }
+    }
+
+    // MARK: - Reply Bubble Theme
+    public struct ReplyBubbleTheme {
+        public let font: Font
+        public let nameFont: Font
+        public let padding: EdgeInsets
+
+        public init(
+            font: Font = .caption,
+            nameFont: Font = .caption2.weight(.semibold),
+            padding: EdgeInsets = .init(top: 8, leading: 12, bottom: 8, trailing: 12)
+        ) {
+            self.font = font
+            self.nameFont = nameFont
+            self.padding = padding
+        }
+    }
+
+    // MARK: - Status Theme
+    public struct StatusTheme {
+        public let size: CGFloat
+
+        public init(
+            size: CGFloat = 14
+        ) {
+            self.size = size
+        }
+    }
+}
+
+extension MessageViewTheme {
+    public static var `default`: MessageViewTheme { .init() }
 }

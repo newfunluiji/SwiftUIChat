@@ -26,14 +26,7 @@ struct MessageView: View {
     @State var statusSize: CGSize = .zero
     @State var timeSize: CGSize = .zero
 
-    static let widthWithMedia: CGFloat = 204
-    static let horizontalAvatarPadding: CGFloat = 8
-    static let horizontalTextPadding: CGFloat = 12
-    static let horizontalAttachmentPadding: CGFloat = 1 // for multiple attachments
-    static let statusViewSize: CGFloat = 14
-    static let horizontalStatusPadding: CGFloat = 8
-    static let horizontalBubblePadding: CGFloat = 70
-
+    var messageViewTheme: MessageViewTheme = .default
     var font: UIFont
 
     enum DateArrangment {
@@ -41,19 +34,19 @@ struct MessageView: View {
     }
 
     var additionalMediaInset: CGFloat {
-        message.attachments.count > 1 ? MessageView.horizontalAttachmentPadding * 2 : 0
+        message.attachments.count > 1 ? messageViewTheme.horizontalAttachmentPadding * 2 : 0
     }
 
     var dateArrangment: DateArrangment {
         let timeWidth = timeSize.width + 10
-        let textPaddings = MessageView.horizontalTextPadding * 2
+        let textPaddings = messageViewTheme.horizontalTextPadding * 2
         let widthWithoutMedia = UIScreen.main.bounds.width
         - avatarViewSize.width
         - statusSize.width
-        - MessageView.horizontalBubblePadding
+        - messageViewTheme.horizontalBubblePadding
         - textPaddings
 
-        let maxWidth = message.attachments.isEmpty ? widthWithoutMedia : MessageView.widthWithMedia - textPaddings
+        let maxWidth = message.attachments.isEmpty ? widthWithoutMedia : messageViewTheme.widthWithMedia - textPaddings
         let finalWidth = message.text.width(withConstrainedWidth: maxWidth, font: font, messageUseMarkdown: messageUseMarkdown)
         let lastLineWidth = message.text.lastLineWidth(labelWidth: maxWidth, font: font, messageUseMarkdown: messageUseMarkdown)
         let numberOfLines = message.text.numberOfLines(labelWidth: maxWidth, font: font, messageUseMarkdown: messageUseMarkdown)
@@ -114,7 +107,7 @@ struct MessageView: View {
         }
         .padding(.top, topPadding)
         .padding(.bottom, bottomPadding)
-        .padding(message.user.isCurrentUser ? .leading : .trailing, MessageView.horizontalBubblePadding)
+        .padding(message.user.isCurrentUser ? .leading : .trailing, messageViewTheme.horizontalBubblePadding)
         .frame(maxWidth: UIScreen.main.bounds.width, alignment: message.user.isCurrentUser ? .trailing : .leading)
     }
 
@@ -147,7 +140,7 @@ struct MessageView: View {
         VStack(alignment: .leading, spacing: 0) {
             Text(message.user.name)
                 .fontWeight(.semibold)
-                .padding(.horizontal, MessageView.horizontalTextPadding)
+                .padding(.horizontal, messageViewTheme.horizontalTextPadding)
 
             if !message.attachments.isEmpty {
                 attachmentsView(message)
@@ -157,7 +150,7 @@ struct MessageView: View {
 
             if !message.text.isEmpty {
                 MessageTextView(text: message.text, messageUseMarkdown: messageUseMarkdown)
-                    .padding(.horizontal, MessageView.horizontalTextPadding)
+                    .padding(.horizontal, messageViewTheme.horizontalTextPadding)
             }
 
             if let recording = message.recording {
@@ -166,7 +159,7 @@ struct MessageView: View {
         }
         .font(.caption2)
         .padding(.vertical, 8)
-        .frame(width: message.attachments.isEmpty ? nil : MessageView.widthWithMedia + additionalMediaInset)
+        .frame(width: message.attachments.isEmpty ? nil : messageViewTheme.widthWithMedia + additionalMediaInset)
         .bubbleBackground(message, theme: theme, isReply: true)
     }
 
@@ -183,7 +176,7 @@ struct MessageView: View {
                 Color.clear.viewSize(avatarSize)
             }
         }
-        .padding(.horizontal, MessageView.horizontalAvatarPadding)
+        .padding(.horizontal, messageViewTheme.horizontalAvatarPadding)
         .sizeGetter($avatarViewSize)
     }
 
@@ -194,8 +187,8 @@ struct MessageView: View {
         }
         .applyIf(message.attachments.count > 1) {
             $0
-                .padding(.top, MessageView.horizontalAttachmentPadding)
-                .padding(.horizontal, MessageView.horizontalAttachmentPadding)
+                .padding(.top, messageViewTheme.horizontalAttachmentPadding)
+                .padding(.horizontal, messageViewTheme.horizontalAttachmentPadding)
         }
         .overlay(alignment: .bottomTrailing) {
             if message.text.isEmpty {
@@ -210,7 +203,7 @@ struct MessageView: View {
     func textWithTimeView(_ message: Message) -> some View {
         let messageView = MessageTextView(text: message.text, messageUseMarkdown: messageUseMarkdown)
             .fixedSize(horizontal: false, vertical: true)
-            .padding(.horizontal, MessageView.horizontalTextPadding)
+            .padding(.horizontal, messageViewTheme.horizontalTextPadding)
 
         let timeView = messageTimeView()
             .padding(.trailing, 12)
@@ -254,7 +247,7 @@ struct MessageView: View {
             colorButtonBg: message.user.isCurrentUser ? .white : theme.colors.myMessage,
             colorWaveform: message.user.isCurrentUser ? theme.colors.textDarkContext : theme.colors.textLightContext
         )
-        .padding(.horizontal, MessageView.horizontalTextPadding)
+        .padding(.horizontal, messageViewTheme.horizontalTextPadding)
         .padding(.top, 8)
     }
 
@@ -279,7 +272,7 @@ extension View {
         let radius: CGFloat = !message.attachments.isEmpty ? 12 : 20
         let additionalMediaInset: CGFloat = message.attachments.count > 1 ? 2 : 0
         self
-            .frame(width: message.attachments.isEmpty ? nil : MessageView.widthWithMedia + additionalMediaInset)
+            .frame(width: message.attachments.isEmpty ? nil : 204 + additionalMediaInset)
             .foregroundColor(message.user.isCurrentUser ? theme.colors.textDarkContext : theme.colors.textLightContext)
             .background {
                 if isReply || !message.text.isEmpty || message.recording != nil {

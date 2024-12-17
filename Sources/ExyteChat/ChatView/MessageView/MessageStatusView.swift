@@ -37,8 +37,8 @@ struct MessageStatusView: View {
                 .foregroundColor(theme.colors.errorStatus)
             }
         }
-        .viewSize(MessageView.statusViewSize)
-        .padding(.trailing, MessageView.horizontalStatusPadding)
+        .viewSize(theme.messageViewTheme.statusViewSize)
+        .padding(.trailing, theme.messageViewTheme.horizontalStatusPadding)
     }
 }
 
