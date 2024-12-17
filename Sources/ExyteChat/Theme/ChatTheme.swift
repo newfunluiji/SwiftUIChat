@@ -321,7 +321,175 @@ public struct ChatTheme {
 
 public struct InputViewTheme {
     public let viewOnTop = ViewOnTop()
-    
+    public let middleView = MiddleViewTheme()
+    public let rightView: RightViewTheme = RightViewTheme()
+    public let rigthOutsideButton = RightOutsideButtonTheme()
+    public let textView = TextViewTheme()
+    public let attachButton = AttachButtonTheme()
+    public let addButton = AddButtonTheme()
+    public let addAttachmentButton = AddAttachmentButtonTheme()
+    public let cameraButton = CameraButtonTheme()
+    public let sendButton = SendButtonTheme()
+    public let recordButton = RecordButtonTheme()
+    public let deleteRecordButton = DeleteRecordButtonTheme()
+    public let stopRecordButton = StopRecordButtonTheme()
+    public let lockRecordButton = LockRecordButtonTheme()
+    public let recordWaveform = RecordWaveformTheme()
+    public let recordDuration = RecordDurationTheme()
+    public let paddingHorizontal: CGFloat
+    public let paddingVertical: CGFloat
+    public let inputAreaSpacing: CGFloat
+    public let inputCornerRadius: CGFloat
+
+    public init(
+        paddingHorizontal: CGFloat = 12,
+        paddingVertical: CGFloat = 8,
+        inputAreaSpacing: CGFloat = 10,
+        inputCornerRadius: CGFloat = 18
+    ) {
+        self.paddingHorizontal = paddingHorizontal
+        self.paddingVertical = paddingVertical
+        self.inputAreaSpacing = inputAreaSpacing
+        self.inputCornerRadius = inputCornerRadius
+    }
+    // MARK: - Camera Button Theme
+    public struct CameraButtonTheme {
+       public let viewSize: CGFloat
+       public let padding: EdgeInsets
+
+       public init(viewSize: CGFloat = 24, padding: EdgeInsets = .init(top: 12, leading: 8, bottom: 12, trailing: 12)) {
+           self.viewSize = viewSize
+           self.padding = padding
+       }
+    }
+
+    // MARK: - Send Button Theme
+    public struct SendButtonTheme {
+       public let viewSize: CGFloat
+
+       public init(viewSize: CGFloat = 48) {
+           self.viewSize = viewSize
+       }
+    }
+
+    // MARK: - Record Button Theme
+    public struct RecordButtonTheme {
+       public let viewSize: CGFloat
+
+       public init(viewSize: CGFloat = 48) {
+           self.viewSize = viewSize
+       }
+    }
+
+    // MARK: - Delete Record Button Theme
+    public struct DeleteRecordButtonTheme {
+       public let viewSize: CGFloat
+       public let padding: EdgeInsets
+
+       public init(viewSize: CGFloat = 24, padding: EdgeInsets = .init(top: 12, leading: 12, bottom: 12, trailing: 8)) {
+           self.viewSize = viewSize
+           self.padding = padding
+       }
+    }
+
+    // MARK: - Stop Record Button Theme
+    public struct StopRecordButtonTheme {
+       public let viewSize: CGFloat
+       public let shadowRadius: CGFloat
+
+       public init(viewSize: CGFloat = 28, shadowRadius: CGFloat = 1) {
+           self.viewSize = viewSize
+           self.shadowRadius = shadowRadius
+       }
+    }
+
+    // MARK: - Lock Record Button Theme
+    public struct LockRecordButtonTheme {
+       public let viewWidth: CGFloat
+       public let paddingVertical: CGFloat
+       public let spacing: CGFloat
+       public let shadowRadius: CGFloat
+
+       public init(viewWidth: CGFloat = 28, paddingVertical: CGFloat = 16, spacing: CGFloat = 20, shadowRadius: CGFloat = 1) {
+           self.viewWidth = viewWidth
+           self.paddingVertical = paddingVertical
+           self.spacing = spacing
+           self.shadowRadius = shadowRadius
+       }
+    }
+
+    // MARK: - Record Waveform Theme
+    public struct RecordWaveformTheme {
+       public let spacing: CGFloat
+       public let extraDots: Bool
+
+       public init(spacing: CGFloat = 8, extraDots: Bool = true) {
+           self.spacing = spacing
+           self.extraDots = extraDots
+       }
+    }
+
+    // MARK: - Record Duration Theme
+    public struct RecordDurationTheme {
+       public let fontSize: CGFloat
+       public let opacity: Double
+       public let paddingTrailing: CGFloat
+
+       public init(fontSize: CGFloat = 10, opacity: Double = 0.6, paddingTrailing: CGFloat = 12) {
+           self.fontSize = fontSize
+           self.opacity = opacity
+           self.paddingTrailing = paddingTrailing
+       }
+    }
+
+    public struct TextViewTheme {
+        public let fontSize: CGFloat
+        public let lineLimit: Int
+
+        public init(fontSize: CGFloat = 12, lineLimit: Int = 1) {
+            self.fontSize = fontSize
+            self.lineLimit = lineLimit
+        }
+    }
+
+    public struct AttachButtonTheme {
+        public let viewSize: CGFloat
+        public let padding: EdgeInsets
+
+        public init(
+            viewSize: CGFloat = 24,
+            padding: EdgeInsets = EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 8)
+        ) {
+            self.viewSize = viewSize
+            self.padding = padding
+        }
+    }
+
+    public struct AddButtonTheme {
+        public let viewSize: CGFloat
+        public let padding: EdgeInsets
+
+        public init(
+            viewSize: CGFloat = 24,
+            padding: EdgeInsets = EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 8)
+        ) {
+            self.viewSize = viewSize
+            self.padding = padding
+        }
+    }
+
+    public struct AddAttachmentButtonTheme {
+        public let viewSize: CGFloat
+        public let padding: EdgeInsets
+
+        public init(
+            viewSize: CGFloat = 24,
+            padding: EdgeInsets = EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 8)
+        ) {
+            self.viewSize = viewSize
+            self.padding = padding
+        }
+    }
     public struct ViewOnTop {
         public let horizontalSpacing: CGFloat
         public let verticalPadding: CGFloat
@@ -356,6 +524,34 @@ public struct InputViewTheme {
             }
         }
     }
+    public struct MiddleViewTheme {
+        public let minimumHeight: CGFloat
+
+        public init(minimumHeight: CGFloat = 48) {
+            self.minimumHeight = minimumHeight
+        }
+    }
+    public struct RightViewTheme {
+        public let minimumHeight: CGFloat
+
+        public init(minimumHeight: CGFloat = 48) {
+            self.minimumHeight = minimumHeight
+        }
+    }
+
+    public struct RightOutsideButtonTheme {
+        public let viewSize: CGFloat
+        public let overlayOffsetY: CGFloat
+
+        public init(
+            viewSize: CGFloat = 48,
+            overlayOffsetY: CGFloat = 24
+        ) {
+            self.viewSize = viewSize
+            self.overlayOffsetY = overlayOffsetY
+        }
+    }
+
 }
 
 extension InputViewTheme {

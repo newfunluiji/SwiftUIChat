@@ -108,24 +108,22 @@ struct InputView: View {
     var body: some View {
         VStack {
             viewOnTop
-            HStack(alignment: .bottom, spacing: 10) {
+            HStack(alignment: .bottom, spacing: inputViewTheme.inputAreaSpacing) {
                 HStack(alignment: .bottom, spacing: 0) {
                     if viewModel.showLeftView {
                         leftView
                     }
                     middleView
-//                    rightView
+                    // rightView
                     rigthOutsideButton
                 }
                 .background {
-                    RoundedRectangle(cornerRadius: 18)
+                    RoundedRectangle(cornerRadius: inputViewTheme.inputCornerRadius)
                         .fill(fieldBackgroundColor)
                 }
-
-//                rigthOutsideButton
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
+            .padding(.horizontal, inputViewTheme.paddingHorizontal)
+            .padding(.vertical, inputViewTheme.paddingVertical)
         }
         .background(backgroundColor)
         .onAppear {
@@ -165,10 +163,15 @@ struct InputView: View {
             case .isRecordingTap:
                 recordingInProgress
             default:
-                TextInputView(text: $viewModel.attachments.text, inputFieldId: inputFieldId, style: style, availableInput: availableInput)
+                TextInputView(
+                    text: $viewModel.attachments.text,
+                    inputFieldId: inputFieldId,
+                    style: style,
+                    availableInput: availableInput
+                )
             }
         }
-        .frame(minHeight: 48)
+        .frame(minHeight: inputViewTheme.middleView.minimumHeight)
     }
 
     @ViewBuilder
@@ -189,7 +192,7 @@ struct InputView: View {
                 Color.clear.frame(width: 8, height: 1)
             }
         }
-        .frame(minHeight: 48)
+        .frame(minHeight: inputViewTheme.rightView.minimumHeight)
     }
 
     @ViewBuilder
@@ -197,16 +200,11 @@ struct InputView: View {
         ZStack {
             if [.isRecordingTap, .isRecordingHold].contains(state) {
                 RecordIndicator()
-                    .viewSize(80)
+                    .viewSize(inputViewTheme.rigthOutsideButton.viewSize)
                     .foregroundColor(theme.colors.sendButtonBackground)
             }
             Group {
-//                if state.canSend {
-                    sendButton
-//                } else {
-//                    recordButton
-//                        .highPriorityGesture(dragGesture())
-//                }
+                sendButton
             }
             .compositingGroup()
             .overlay(alignment: .top) {
@@ -218,11 +216,10 @@ struct InputView: View {
                     }
                 }
                 .sizeGetter($overlaySize)
-                // hardcode 28 for now because sizeGetter returns 0 somehow
-                .offset(y: (state == .isRecordingTap ? -28 : -overlaySize.height) - 24)
+                .offset(y: -inputViewTheme.rigthOutsideButton.overlayOffsetY)
             }
         }
-        .viewSize(48)
+        .viewSize(inputViewTheme.rigthOutsideButton.viewSize)
     }
 
     @ViewBuilder
@@ -282,8 +279,12 @@ struct InputView: View {
         if messageUseMarkdown,
            let attributed = try? AttributedString(markdown: text) {
             Text(attributed)
+                .font(.system(size: inputViewTheme.textView.fontSize))
+                .lineLimit(inputViewTheme.textView.lineLimit)
         } else {
             Text(text)
+                .font(.system(size: inputViewTheme.textView.fontSize))
+                .lineLimit(inputViewTheme.textView.lineLimit)
         }
     }
 
@@ -292,8 +293,8 @@ struct InputView: View {
             onAction(.photo)
         } label: {
             theme.images.inputView.attach
-                .viewSize(24)
-                .padding(EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 8))
+                .viewSize(inputViewTheme.attachButton.viewSize)
+                .padding(inputViewTheme.attachButton.padding)
         }
     }
 
@@ -302,9 +303,9 @@ struct InputView: View {
             onAction(.add)
         } label: {
             theme.images.inputView.add
-                .viewSize(24)
+                .viewSize(inputViewTheme.addButton.viewSize)
                 .circleBackground(theme.colors.addButtonBackground)
-                .padding(EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 8))
+                .padding(inputViewTheme.addButton.padding)
         }
     }
 
@@ -327,9 +328,9 @@ struct InputView: View {
             }
         } label: {
             theme.images.inputView.add
-                .viewSize(24)
+                .viewSize(inputViewTheme.addAttachmentButton.viewSize)
                 .circleBackground(theme.colors.addButtonBackground)
-                .padding(EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 8))
+                .padding(inputViewTheme.addAttachmentButton.padding)
         }
     }
 
@@ -338,8 +339,8 @@ struct InputView: View {
             onAction(.camera)
         } label: {
             theme.images.inputView.attachCamera
-                .viewSize(24)
-                .padding(EdgeInsets(top: 12, leading: 8, bottom: 12, trailing: 12))
+                .viewSize(inputViewTheme.cameraButton.viewSize)
+                .padding(inputViewTheme.cameraButton.padding)
         }
     }
 
@@ -348,7 +349,7 @@ struct InputView: View {
             onAction(.send)
         } label: {
             theme.images.inputView.arrowSend
-                .viewSize(48)
+                .viewSize(inputViewTheme.sendButton.viewSize)
                 .circleBackground(theme.colors.sendButtonBackground)
         }
         .disabled(!state.canSend)
@@ -356,7 +357,7 @@ struct InputView: View {
 
     var recordButton: some View {
         theme.images.inputView.microphone
-            .viewSize(48)
+            .viewSize(inputViewTheme.recordButton.viewSize)
             .circleBackground(theme.colors.sendButtonBackground)
             .frameGetter($recordButtonFrame)
     }
@@ -366,8 +367,8 @@ struct InputView: View {
             onAction(.deleteRecord)
         } label: {
             theme.images.recordAudio.deleteRecord
-                .viewSize(24)
-                .padding(EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 8))
+                .viewSize(inputViewTheme.deleteRecordButton.viewSize)
+                .padding(inputViewTheme.deleteRecordButton.padding)
         }
         .frameGetter($deleteRecordFrame)
     }
@@ -377,11 +378,11 @@ struct InputView: View {
             onAction(.stopRecordAudio)
         } label: {
             theme.images.recordAudio.stopRecord
-                .viewSize(28)
+                .viewSize(inputViewTheme.stopRecordButton.viewSize)
                 .background(
                     Capsule()
                         .fill(Color.white)
-                        .shadow(color: .black.opacity(0.4), radius: 1)
+                        .shadow(color: .black.opacity(0.4), radius: inputViewTheme.stopRecordButton.shadowRadius)
                 )
         }
     }
@@ -390,16 +391,16 @@ struct InputView: View {
         Button {
             onAction(.recordAudioLock)
         } label: {
-            VStack(spacing: 20) {
+            VStack(spacing: inputViewTheme.lockRecordButton.spacing) {
                 theme.images.recordAudio.lockRecord
                 theme.images.recordAudio.sendRecord
             }
-            .frame(width: 28)
-            .padding(.vertical, 16)
+            .frame(width: inputViewTheme.lockRecordButton.viewWidth)
+            .padding(.vertical, inputViewTheme.lockRecordButton.paddingVertical)
             .background(
                 Capsule()
                     .fill(Color.white)
-                    .shadow(color: .black.opacity(0.4), radius: 1)
+                    .shadow(color: .black.opacity(0.4), radius: inputViewTheme.lockRecordButton.shadowRadius)
             )
         }
         .frameGetter($lockRecordFrame)
@@ -444,10 +445,10 @@ struct InputView: View {
     var recordDuration: some View {
         Text(DateFormatter.timeString(Int(viewModel.attachments.recording?.duration ?? 0)))
             .foregroundColor(theme.colors.textLightContext)
-            .opacity(0.6)
-            .font(.caption2)
+            .opacity(inputViewTheme.recordDuration.opacity)
+            .font(.system(size: inputViewTheme.recordDuration.fontSize))
             .monospacedDigit()
-            .padding(.trailing, 12)
+            .padding(.trailing, inputViewTheme.recordDuration.paddingTrailing)
     }
 
     var recordDurationLeft: some View {
@@ -478,7 +479,7 @@ struct InputView: View {
     @ViewBuilder
     var recordWaveform: some View {
         if let samples = viewModel.attachments.recording?.waveformSamples {
-            HStack(spacing: 8) {
+            HStack(spacing: inputViewTheme.recordWaveform.spacing) {
                 Group {
                     if state == .hasRecording || state == .pausedRecording {
                         playRecordButton
@@ -488,7 +489,12 @@ struct InputView: View {
                 }
                 .frame(width: 20)
 
-                RecordWaveformPlaying(samples: samples, progress: recordingPlayer.progress, color: theme.colors.textLightContext, addExtraDots: true)
+                RecordWaveformPlaying(
+                    samples: samples,
+                    progress: recordingPlayer.progress,
+                    color: theme.colors.textLightContext,
+                    addExtraDots: inputViewTheme.recordWaveform.extraDots
+                )
             }
             .padding(.horizontal, 8)
         }
