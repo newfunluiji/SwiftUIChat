@@ -96,18 +96,19 @@ struct MessageView: View {
                 bubbleView(message)
             }
 
-            if message.user.isCurrentUser, let status = message.status {
-                MessageStatusView(status: status) {
-                    if case let .error(draft) = status {
-                        viewModel.sendMessage(draft)
-                    }
-                }
-                .sizeGetter($statusSize)
-            }
+//            if message.user.isCurrentUser, let status = message.status {
+//                MessageStatusView(status: status) {
+//                    if case let .error(draft) = status {
+//                        viewModel.sendMessage(draft)
+//                    }
+//                }
+//                .sizeGetter($statusSize)
+//            }
         }
         .padding(.top, topPadding)
         .padding(.bottom, bottomPadding)
-        .padding(message.user.isCurrentUser ? .leading : .trailing, messageViewTheme.horizontalBubblePadding)
+        .padding(message.user.isCurrentUser ? .leading : .trailing,message.user.isCurrentUser ? messageViewTheme.horizontalBubblePadding : 20)
+        .padding(message.user.isCurrentUser ? .trailing : .leading, 20)
         .frame(maxWidth: UIScreen.main.bounds.width, alignment: message.user.isCurrentUser ? .trailing : .leading)
     }
 
@@ -269,7 +270,7 @@ extension View {
 
     @ViewBuilder
     func bubbleBackground(_ message: Message, theme: ChatTheme, isReply: Bool = false) -> some View {
-        let radius: CGFloat = !message.attachments.isEmpty ? 12 : 20
+        let radius: CGFloat = !message.attachments.isEmpty ? 8 : 8
         let additionalMediaInset: CGFloat = message.attachments.count > 1 ? 2 : 0
         self
             .frame(width: message.attachments.isEmpty ? nil : 204 + additionalMediaInset)

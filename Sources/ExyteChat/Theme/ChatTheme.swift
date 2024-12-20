@@ -346,10 +346,10 @@ public struct InputViewTheme {
     public let inputCornerRadius: CGFloat
 
     public init(
-        paddingHorizontal: CGFloat = 12,
-        paddingVertical: CGFloat = 8,
-        inputAreaSpacing: CGFloat = 10,
-        inputCornerRadius: CGFloat = 18
+        paddingHorizontal: CGFloat = 20,
+        paddingVertical: CGFloat = 20,
+        inputAreaSpacing: CGFloat = 8,
+        inputCornerRadius: CGFloat = 32
     ) {
         self.paddingHorizontal = paddingHorizontal
         self.paddingVertical = paddingVertical
@@ -633,7 +633,7 @@ public struct MessageViewTheme {
         status: StatusTheme = .init(),
         widthWithMedia: CGFloat = 204,
         horizontalAvatarPadding: CGFloat = 8,
-        horizontalTextPadding: CGFloat = 12,
+        horizontalTextPadding: CGFloat = 16,
         horizontalAttachmentPadding: CGFloat = 1,
         statusViewSize: CGFloat = 14,
         horizontalStatusPadding: CGFloat = 8,

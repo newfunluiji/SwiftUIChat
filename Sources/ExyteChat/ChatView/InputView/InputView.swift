@@ -304,7 +304,7 @@ struct InputView: View {
         } label: {
             theme.images.inputView.add
                 .viewSize(inputViewTheme.addButton.viewSize)
-                .circleBackground(theme.colors.addButtonBackground)
+//                .circleBackground(theme.colors.addButtonBackground)
                 .padding(inputViewTheme.addButton.padding)
         }
     }
@@ -329,7 +329,7 @@ struct InputView: View {
         } label: {
             theme.images.inputView.add
                 .viewSize(inputViewTheme.addAttachmentButton.viewSize)
-                .circleBackground(theme.colors.addButtonBackground)
+//                .circleBackground(theme.colors.addButtonBackground)
                 .padding(inputViewTheme.addAttachmentButton.padding)
         }
     }
@@ -350,7 +350,7 @@ struct InputView: View {
         } label: {
             theme.images.inputView.arrowSend
                 .viewSize(inputViewTheme.sendButton.viewSize)
-                .circleBackground(theme.colors.sendButtonBackground)
+//                .circleBackground(theme.colors.sendButtonBackground)
         }
         .disabled(!state.canSend)
     }
@@ -358,7 +358,7 @@ struct InputView: View {
     var recordButton: some View {
         theme.images.inputView.microphone
             .viewSize(inputViewTheme.recordButton.viewSize)
-            .circleBackground(theme.colors.sendButtonBackground)
+//            .circleBackground(theme.colors.sendButtonBackground)
             .frameGetter($recordButtonFrame)
     }
 

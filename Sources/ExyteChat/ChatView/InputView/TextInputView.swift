@@ -20,7 +20,7 @@ struct TextInputView: View {
             .customFocus($globalFocusState.focus, equals: .uuid(inputFieldId))
             .placeholder(when: text.isEmpty) {
                 Text(LocalizedStringKey(style.placeholder))
-                    .foregroundColor(.black)
+                    .foregroundColor(Color(red: 1 / 255, green: 22 / 255, blue: 39 / 255, opacity: 1.0))
             }
             .foregroundColor(style == .message ? .black : theme.colors.textDarkContext)
             .padding(.vertical, 10)
