@@ -78,9 +78,9 @@ struct MessageView: View {
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 0) {
-            if !message.user.isCurrentUser {
-                avatarView
-            }
+//            if !message.user.isCurrentUser {
+//                avatarView
+//            }
 
             VStack(alignment: message.user.isCurrentUser ? .trailing : .leading, spacing: 2) {
                 if !isDisplayingMessageMenu, let reply = message.replyMessage?.toMessage() {
@@ -126,9 +126,9 @@ struct MessageView: View {
             if let recording = message.recording {
                 VStack(alignment: .trailing, spacing: 8) {
                     recordingView(recording)
-                    messageTimeView()
-                        .padding(.bottom, 8)
-                        .padding(.trailing, 12)
+//                    messageTimeView()
+//                        .padding(.bottom, 8)
+//                        .padding(.trailing, 12)
                 }
             }
         }
@@ -190,12 +190,12 @@ struct MessageView: View {
                 .padding(.top, messageViewTheme.horizontalAttachmentPadding)
                 .padding(.horizontal, messageViewTheme.horizontalAttachmentPadding)
         }
-        .overlay(alignment: .bottomTrailing) {
-            if message.text.isEmpty {
-                messageTimeView(needsCapsule: true)
-                    .padding(4)
-            }
-        }
+//        .overlay(alignment: .bottomTrailing) {
+//            if message.text.isEmpty {
+//                messageTimeView(needsCapsule: true)
+//                    .padding(4)
+//            }
+//        }
         .contentShape(Rectangle())
     }
 
@@ -205,8 +205,8 @@ struct MessageView: View {
             .fixedSize(horizontal: false, vertical: true)
             .padding(.horizontal, messageViewTheme.horizontalTextPadding)
 
-        let timeView = messageTimeView()
-            .padding(.trailing, 12)
+//        let timeView = messageTimeView()
+//            .padding(.trailing, 12)
 
         Group {
             switch dateArrangment {
@@ -216,7 +216,7 @@ struct MessageView: View {
                     if !message.attachments.isEmpty {
                         Spacer()
                     }
-                    timeView
+//                    timeView
                 }
                 .padding(.vertical, 8)
             case .vstack:
@@ -224,17 +224,17 @@ struct MessageView: View {
                     messageView
                     HStack(spacing: 0) {
                         Spacer()
-                        timeView
+//                        timeView
                     }
                 }
                 .padding(.vertical, 8)
             case .overlay:
                 messageView
                     .padding(.vertical, 8)
-                    .overlay(alignment: .bottomTrailing) {
-                        timeView
-                            .padding(.vertical, 8)
-                    }
+//                    .overlay(alignment: .bottomTrailing) {
+//                        timeView
+//                            .padding(.vertical, 8)
+//                    }
             }
         }
     }
@@ -251,18 +251,18 @@ struct MessageView: View {
         .padding(.top, 8)
     }
 
-    func messageTimeView(needsCapsule: Bool = false) -> some View {
-        Group {
-            if showMessageTimeView {
-                if needsCapsule {
-                    MessageTimeWithCapsuleView(text: message.time, isCurrentUser: message.user.isCurrentUser, chatTheme: theme)
-                } else {
-                    MessageTimeView(text: message.time, isCurrentUser: message.user.isCurrentUser, chatTheme: theme)
-                }
-            }
-        }
-        .sizeGetter($timeSize)
-    }
+//    func messageTimeView(needsCapsule: Bool = false) -> some View {
+//        Group {
+//            if showMessageTimeView {
+//                if needsCapsule {
+//                    MessageTimeWithCapsuleView(text: message.time, isCurrentUser: message.user.isCurrentUser, chatTheme: theme)
+//                } else {
+//                    MessageTimeView(text: message.time, isCurrentUser: message.user.isCurrentUser, chatTheme: theme)
+//                }
+//            }
+//        }
+//        .sizeGetter($timeSize)
+//    }
 }
 
 extension View {
