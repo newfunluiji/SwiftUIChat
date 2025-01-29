@@ -1,6 +1,6 @@
 //
 //  ChatTheme.swift
-//  
+//
 //
 //  Created by Alisa Mylnikova on 31.01.2023.
 //
@@ -33,7 +33,7 @@ public struct ChatTheme {
     public let colors: ChatTheme.Colors
     public let images: ChatTheme.Images
     public let messageViewTheme: MessageViewTheme
-    
+
 
     public init(colors: ChatTheme.Colors = .init(),
                 images: ChatTheme.Images = .init(),
@@ -44,74 +44,75 @@ public struct ChatTheme {
     }
 
     public struct Colors {
-        public var grayStatus: Color
-        public var errorStatus: Color
+        public var mainBG: Color
+        public var mainTint: Color
+        public var mainText: Color
+        public var mainCaptionText: Color
 
-        public var inputLightContextBackground: Color
-        public var inputDarkContextBackground: Color
+        public var messageMyBG: Color
+        public var messageMyText: Color
+        public var messageMyTimeText: Color
 
-        public var mainBackground: Color
-        public var buttonBackground: Color
-        public var addButtonBackground: Color
+        public var messageFriendBG: Color
+        public var messageFriendText: Color
+        public var messageFriendTimeText: Color
+
+        public var inputBG: Color
+        public var inputText: Color
+        public var inputPlaceholderText: Color
+
+        public var menuBG: Color
+        public var menuText: Color
+        public var menuTextDelete: Color
+
+        public var statusError: Color
+        public var statusGray: Color
+
         public var sendButtonBackground: Color
-
-        public var myMessage: Color
-        public var friendMessage: Color
-        public var suggestionMessage: Color
-
-
-        public var textLightContext: Color
-        public var textDarkContext: Color
-        public var textMediaPicker: Color
-
         public var recordDot: Color
 
-        public var myMessageTime: Color
-        public var frientMessageTime: Color
-
-        public var timeCapsuleBackground: Color
-        public var timeCapsuleForeground: Color
-
         public init(
-            grayStatus: Color = Color(hex: "AFB3B8"),
-            errorStatus: Color = Color.red,
-            inputLightContextBackground: Color = Color(hex: "F2F3F5"),
-            inputDarkContextBackground: Color = Color(hex: "F2F3F5").opacity(0.12),
-            mainBackground: Color = .white,
-            buttonBackground: Color = Color(hex: "989EAC"),
-            addButtonBackground: Color = Color(hex: "#4F5055"),
-            sendButtonBackground: Color = Color(hex: "#4962FF"),
-            myMessage: Color = Color(hex: "4962FF"),
-            friendMessage: Color = Color(hex: "EBEDF0"),
-            suggestionMessage: Color = Color(hex: "EBEDF0"),
-            textLightContext: Color = Color.black,
-            textDarkContext: Color = Color.white,
-            textMediaPicker: Color = Color(hex: "818C99"),
-            recordDot: Color = Color(hex: "F62121"),
-            myMessageTime: Color = .white.opacity(0.4),
-            frientMessageTime: Color = .black.opacity(0.4),
-            timeCapsuleBackground: Color = .black.opacity(0.4),
-            timeCapsuleForeground: Color = .white
+            mainBG: Color = Color("mainBG", bundle: .current),
+            mainTint: Color = Color("inputPlaceholderText", bundle: .current),
+            mainText: Color = Color("mainText", bundle: .current),
+            mainCaptionText: Color = Color("mainCaptionText", bundle: .current),
+            messageMyBG: Color = Color("messageMyBG", bundle: .current),
+            messageMyText: Color = Color.white,
+            messageMyTimeText: Color = Color("messageMyTimeText", bundle: .current),
+            messageFriendBG: Color = Color("messageFriendBG", bundle: .current),
+            messageFriendText: Color = Color("mainText", bundle: .current),
+            messageFriendTimeText: Color = Color("messageFriendTimeText", bundle: .current),
+            inputBG: Color = Color("inputBG", bundle: .current),
+            inputText: Color = Color("mainText", bundle: .current),
+            inputPlaceholderText: Color = Color("inputPlaceholderText", bundle: .current),
+            menuBG: Color = Color("menuBG", bundle: .current),
+            menuText: Color = Color("menuText", bundle: .current),
+            menuTextDelete: Color = Color("menuTextDelete", bundle: .current),
+            statusError: Color = Color("statusError", bundle: .current),
+            statusGray: Color = Color("statusGray", bundle: .current),
+            sendButtonBackground: Color = Color("messageMyBG", bundle: .current),
+            recordDot: Color = Color("menuTextDelete", bundle: .current)
         ) {
-            self.grayStatus = grayStatus
-            self.errorStatus = errorStatus
-            self.inputLightContextBackground = inputLightContextBackground
-            self.inputDarkContextBackground = inputDarkContextBackground
-            self.mainBackground = mainBackground
-            self.buttonBackground = buttonBackground
-            self.addButtonBackground = addButtonBackground
+            self.mainBG = mainBG
+            self.mainTint = mainTint
+            self.mainText = mainText
+            self.mainCaptionText = mainCaptionText
+            self.messageMyBG = messageMyBG
+            self.messageMyText = messageMyText
+            self.messageMyTimeText = messageMyTimeText
+            self.messageFriendBG = messageFriendBG
+            self.messageFriendText = messageFriendText
+            self.messageFriendTimeText = messageFriendTimeText
+            self.inputBG = inputBG
+            self.inputText = inputText
+            self.inputPlaceholderText = inputPlaceholderText
+            self.menuBG = menuBG
+            self.menuText = menuText
+            self.menuTextDelete = menuTextDelete
+            self.statusError = statusError
+            self.statusGray = statusGray
             self.sendButtonBackground = sendButtonBackground
-            self.myMessage = myMessage
-            self.friendMessage = friendMessage
-            self.suggestionMessage = suggestionMessage
-            self.textLightContext = textLightContext
-            self.textDarkContext = textDarkContext
-            self.textMediaPicker = textMediaPicker
             self.recordDot = recordDot
-            self.myMessageTime = myMessageTime
-            self.frientMessageTime = frientMessageTime
-            self.timeCapsuleBackground = timeCapsuleBackground
-            self.timeCapsuleForeground = timeCapsuleForeground
         }
     }
 
@@ -161,16 +162,6 @@ public struct ChatTheme {
             public var sending: Image
         }
 
-        public struct MessageMenu {
-            public var delete: Image
-            public var edit: Image
-            public var forward: Image
-            public var reply: Image
-            public var retry: Image
-            public var save: Image
-            public var select: Image
-        }
-
         public struct RecordAudio {
             public var cancelRecord: Image
             public var deleteRecord: Image
@@ -194,7 +185,6 @@ public struct ChatTheme {
         public var fullscreenMedia: FullscreenMedia
         public var mediaPicker: MediaPicker
         public var message: Message
-        public var messageMenu: MessageMenu
         public var recordAudio: RecordAudio
         public var reply: Reply
 
@@ -229,13 +219,6 @@ public struct ChatTheme {
             playAudio: Image? = nil,
             playVideo: Image? = nil,
             sending: Image? = nil,
-            delete: Image? = nil,
-            edit: Image? = nil,
-            forward: Image? = nil,
-            reply: Image? = nil,
-            retry: Image? = nil,
-            save: Image? = nil,
-            select: Image? = nil,
             cancelRecord: Image? = nil,
             deleteRecord: Image? = nil,
             lockRecord: Image? = nil,
@@ -499,7 +482,7 @@ public struct InputViewTheme {
         public let verticalPadding: CGFloat
         public let horizontalPadding: CGFloat
         public let attachment: Attachment
-        
+
         public init(
             horizontalSpacing: CGFloat = 8,
             verticalPadding: CGFloat = 8,
@@ -511,12 +494,12 @@ public struct InputViewTheme {
             self.horizontalPadding = horizontalPadding
             self.attachment = attachment
         }
-        
+
         public struct Attachment {
             public let viewSize: CGFloat
             public let cornerRadius: CGFloat
             public let trailingPadding: CGFloat
-            
+
             public init(
                 viewSize: CGFloat = 30,
                 cornerRadius: CGFloat = 4,
@@ -653,7 +636,7 @@ public struct MessageViewTheme {
         self.statusViewSize = statusViewSize
         self.horizontalStatusPadding = horizontalStatusPadding
         self.horizontalBubblePadding = horizontalBubblePadding
-        
+
     }
 
     // MARK: - Avatar Theme

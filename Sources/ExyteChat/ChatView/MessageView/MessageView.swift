@@ -14,7 +14,7 @@ struct MessageView: View {
     @ObservedObject var viewModel: ChatViewModel
 
     let message: Message
-    let positionInGroup: PositionInGroup
+    let positionInUserGroup: PositionInUserGroup
     let chatType: ChatType
     let avatarSize: CGFloat
     let tapAvatarClosure: ChatView.TapAvatarClosure?
@@ -26,10 +26,19 @@ struct MessageView: View {
     @State var statusSize: CGSize = .zero
     @State var timeSize: CGSize = .zero
 
+    static let widthWithMedia: CGFloat = 204
+    static let horizontalNoAvatarPadding: CGFloat = 8
+    static let horizontalAvatarPadding: CGFloat = 8
+    static let horizontalTextPadding: CGFloat = 12
+    static let horizontalAttachmentPadding: CGFloat = 1 // for multiple attachments
+    static let statusViewSize: CGFloat = 14
+    static let horizontalStatusPadding: CGFloat = 8
+    static let horizontalBubblePadding: CGFloat = 70
+
     var messageViewTheme: MessageViewTheme = .default
     var font: UIFont
 
-    enum DateArrangment {
+    enum DateArrangement {
         case hstack, vstack, overlay
     }
 
@@ -37,11 +46,11 @@ struct MessageView: View {
         message.attachments.count > 1 ? messageViewTheme.horizontalAttachmentPadding * 2 : 0
     }
 
-    var dateArrangment: DateArrangment {
+    var dateArrangement: DateArrangement {
         let timeWidth = timeSize.width + 10
         let textPaddings = messageViewTheme.horizontalTextPadding * 2
         let widthWithoutMedia = UIScreen.main.bounds.width
-        - avatarViewSize.width
+        - (message.user.isCurrentUser ? MessageView.horizontalNoAvatarPadding : avatarViewSize.width)
         - statusSize.width
         - messageViewTheme.horizontalBubblePadding
         - textPaddings
@@ -61,19 +70,19 @@ struct MessageView: View {
     }
 
     var showAvatar: Bool {
-        positionInGroup == .single
-        || (chatType == .chat && positionInGroup == .last)
-        || (chatType == .comments && positionInGroup == .first)
+        positionInUserGroup == .single
+        || (chatType == .conversation && positionInUserGroup == .last)
+        || (chatType == .comments && positionInUserGroup == .first)
     }
 
     var topPadding: CGFloat {
         if chatType == .comments { return 0 }
-        return positionInGroup == .single || positionInGroup == .first ? 8 : 4
+        return positionInUserGroup == .single || positionInUserGroup == .first ? 8 : 4
     }
 
     var bottomPadding: CGFloat {
-        if chatType == .chat { return 0 }
-        return positionInGroup == .single || positionInGroup == .first ? 8 : 4
+        if chatType == .conversation { return 0 }
+        return positionInUserGroup == .single || positionInUserGroup == .first ? 8 : 4
     }
 
     var body: some View {
@@ -89,7 +98,7 @@ struct MessageView: View {
                         .padding(message.user.isCurrentUser ? .trailing : .leading, 10)
                         .overlay(alignment: message.user.isCurrentUser ? .trailing : .leading) {
                             Capsule()
-                                .foregroundColor(theme.colors.buttonBackground)
+                                .foregroundColor(theme.colors.mainTint)
                                 .frame(width: 2)
                         }
                 }
@@ -210,7 +219,7 @@ struct MessageView: View {
 //            .padding(.trailing, 12)
 
         Group {
-            switch dateArrangment {
+            switch dateArrangement {
             case .hstack:
                 HStack(alignment: .lastTextBaseline, spacing: 12) {
                     messageView
@@ -244,9 +253,9 @@ struct MessageView: View {
     func recordingView(_ recording: Recording) -> some View {
         RecordWaveformWithButtons(
             recording: recording,
-            colorButton: message.user.isCurrentUser ? theme.colors.myMessage : .white,
-            colorButtonBg: message.user.isCurrentUser ? .white : theme.colors.myMessage,
-            colorWaveform: message.user.isCurrentUser ? theme.colors.textDarkContext : theme.colors.textLightContext
+            colorButton: message.user.isCurrentUser ? theme.colors.messageMyBG : theme.colors.mainBG,
+            colorButtonBg: message.user.isCurrentUser ? theme.colors.mainBG : theme.colors.messageMyBG,
+            colorWaveform: message.user.isCurrentUser ? theme.colors.messageMyText : theme.colors.messageFriendText
         )
         .padding(.horizontal, messageViewTheme.horizontalTextPadding)
         .padding(.top, 8)
@@ -274,11 +283,11 @@ extension View {
         let additionalMediaInset: CGFloat = message.attachments.count > 1 ? 2 : 0
         self
             .frame(width: message.attachments.isEmpty ? nil : 204 + additionalMediaInset)
-            .foregroundColor(message.user.isCurrentUser ? theme.colors.textDarkContext : theme.colors.textLightContext)
+            .foregroundColor(message.user.isCurrentUser ? theme.colors.messageMyText : theme.colors.messageFriendText)
             .background {
                 if isReply || !message.text.isEmpty || message.recording != nil {
                     RoundedRectangle(cornerRadius: radius)
-                        .foregroundColor(message.user.isCurrentUser ? theme.colors.myMessage : theme.colors.friendMessage)
+                        .foregroundColor(message.user.isCurrentUser ? theme.colors.messageMyBG : theme.colors.messageFriendBG)
                         .opacity(isReply ? 0.5 : 1)
                 }
             }
@@ -323,8 +332,8 @@ struct MessageView_Preview: PreviewProvider {
             MessageView(
                 viewModel: ChatViewModel(),
                 message: replyedMessage,
-                positionInGroup: .single,
-                chatType: .chat,
+                positionInUserGroup: .single,
+                chatType: .conversation,
                 avatarSize: 32,
                 tapAvatarClosure: nil,
                 messageUseMarkdown: false,

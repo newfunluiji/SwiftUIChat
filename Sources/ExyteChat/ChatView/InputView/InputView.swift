@@ -38,6 +38,9 @@ public enum InputViewAction {
     case document
     //    case location
     //    case document
+
+    case saveEdit
+    case cancelEdit
 }
 
 public enum InputViewState {
@@ -51,6 +54,8 @@ public enum InputViewState {
     case playingRecording
     case pausedRecording
 
+    case editing
+
     var canSend: Bool {
         switch self {
         case .hasTextOrMedia, .hasRecording, .isRecordingTap, .playingRecording, .pausedRecording: return true
@@ -60,12 +65,21 @@ public enum InputViewState {
 }
 
 public enum AvailableInputType {
-    case full // Camera + attachments + text + audio
+    case full // media + text + audio
+    case textAndMedia
     case textAndAudio
+    case textOnly
+
+    var isMediaAvailable: Bool {
+        [.full, .textAndMedia].contains(self)
+    }
+
+    var isAudioAvailable: Bool {
+        [.full, .textAndAudio].contains(self)
+    }
 }
 
 public struct InputViewAttachments {
-    public var text: String = ""
     public var medias: [Media] = []
     public var files: [URL] = []
     public var recording: Recording?
@@ -83,6 +97,9 @@ struct InputView: View {
     var availableInput: AvailableInputType
     var messageUseMarkdown: Bool
     var inputViewTheme = InputViewTheme.default
+
+    var recorderSettings: RecorderSettings = RecorderSettings()
+    var localization: ChatLocalization
 
     @StateObject var recordingPlayer = RecordingPlayer()
 
@@ -103,7 +120,7 @@ struct InputView: View {
     @State private var dragStart: Date?
     @State private var tapDelayTimer: Timer?
     @State private var cancelGesture = false
-    let tapDelay = 0.2
+    private let tapDelay = 0.2
 
     var body: some View {
         VStack {
@@ -119,8 +136,10 @@ struct InputView: View {
                 }
                 .background {
                     RoundedRectangle(cornerRadius: inputViewTheme.inputCornerRadius)
-                        .fill(fieldBackgroundColor)
+                        .fill(theme.colors.inputBG)
                 }
+
+                rightOutsideButton
             }
             .padding(.horizontal, inputViewTheme.paddingHorizontal)
             .padding(.vertical, inputViewTheme.paddingVertical)
@@ -128,6 +147,7 @@ struct InputView: View {
         .background(backgroundColor)
         .onAppear {
             viewModel.recordingPlayer = recordingPlayer
+            viewModel.setRecorderSettings(recorderSettings: recorderSettings)
         }
     }
 
@@ -138,7 +158,7 @@ struct InputView: View {
         } else {
             switch style {
             case .message:
-                if availableInput == .full {
+                if availableInput.isMediaAvailable {
 //                    attachButton
                     addAttachmentButton
                 }
@@ -163,12 +183,7 @@ struct InputView: View {
             case .isRecordingTap:
                 recordingInProgress
             default:
-                TextInputView(
-                    text: $viewModel.attachments.text,
-                    inputFieldId: inputFieldId,
-                    style: style,
-                    availableInput: availableInput
-                )
+                TextInputView(text: $viewModel.text, inputFieldId: inputFieldId, style: style, availableInput: availableInput, localization: localization)
             }
         }
         .frame(minHeight: inputViewTheme.middleView.minimumHeight)
@@ -179,7 +194,7 @@ struct InputView: View {
         Group {
             switch state {
             case .empty, .waitingForRecordingPermission:
-                if case .message = style, availableInput == .full {
+                if case .message = style, availableInput.isMediaAvailable {
                     cameraButton
                 }
             case .isRecordingHold, .isRecordingTap:
@@ -196,30 +211,68 @@ struct InputView: View {
     }
 
     @ViewBuilder
-    var rigthOutsideButton: some View {
-        ZStack {
-            if [.isRecordingTap, .isRecordingHold].contains(state) {
-                RecordIndicator()
-                    .viewSize(inputViewTheme.rigthOutsideButton.viewSize)
-                    .foregroundColor(theme.colors.sendButtonBackground)
+    var editingButtons: some View {
+        HStack {
+            Button {
+                onAction(.cancelEdit)
+            } label: {
+                Image(systemName: "xmark")
+                    .foregroundStyle(.white)
+                    .fontWeight(.bold)
+                    .padding(5)
+                    .background(Circle().foregroundStyle(.red))
             }
-            Group {
-                sendButton
-            }
-            .compositingGroup()
-            .overlay(alignment: .top) {
-                Group {
-                    if state == .isRecordingTap {
-                        stopRecordButton
-                    } else if state == .isRecordingHold {
-                        lockRecordButton
-                    }
-                }
-                .sizeGetter($overlaySize)
-                .offset(y: -inputViewTheme.rigthOutsideButton.overlayOffsetY)
+
+            Button {
+                onAction(.saveEdit)
+            } label: {
+                Image(systemName: "checkmark")
+                    .foregroundStyle(.white)
+                    .fontWeight(.bold)
+                    .padding(5)
+                    .background(Circle().foregroundStyle(.green))
             }
         }
-        .viewSize(inputViewTheme.rigthOutsideButton.viewSize)
+    }
+
+    @ViewBuilder
+    var rightOutsideButton: some View {
+        if state == .editing {
+            editingButtons
+                .frame(height: 48)
+        }
+        else {
+            ZStack {
+                if [.isRecordingTap, .isRecordingHold].contains(state) {
+                    RecordIndicator()
+                        .viewSize(80)
+                        .foregroundColor(theme.colors.sendButtonBackground)
+                }
+                Group {
+                    if state.canSend || availableInput == .textOnly || availableInput == .textAndMedia {
+                        sendButton
+                            .disabled(!state.canSend)
+                    } else {
+                        recordButton
+                            .highPriorityGesture(dragGesture())
+                    }
+                }
+                .compositingGroup()
+                .overlay(alignment: .top) {
+                    Group {
+                        if state == .isRecordingTap {
+                            stopRecordButton
+                        } else if state == .isRecordingHold {
+                            lockRecordButton
+                        }
+                    }
+                    .sizeGetter($overlaySize)
+                    // hardcode 28 for now because sizeGetter returns 0 somehow
+                    .offset(y: (state == .isRecordingTap ? -28 : -overlaySize.height) - 24)
+                }
+            }
+            .viewSize(inputViewTheme.rigthOutsideButton.viewSize)
+        }
     }
 
     @ViewBuilder
@@ -227,23 +280,24 @@ struct InputView: View {
         if let message = viewModel.attachments.replyMessage {
             VStack(spacing: inputViewTheme.viewOnTop.horizontalSpacing) {
                 Rectangle()
-                    .foregroundColor(theme.colors.friendMessage)
+                    .foregroundColor(theme.colors.messageFriendBG)
                     .frame(height: 2)
 
                 HStack {
                     theme.images.reply.replyToMessage
+                        .foregroundStyle(theme.colors.sendButtonBackground)
                     Capsule()
-                        .foregroundColor(theme.colors.myMessage)
+                        .foregroundColor(theme.colors.messageMyBG)
                         .frame(width: 2)
                     VStack(alignment: .leading) {
-                        Text("Reply to \(message.user.name)")
+                        Text(localization.replyToText + " " + message.user.name)
                             .font(.caption2)
-                            .foregroundColor(theme.colors.buttonBackground)
+                            .foregroundColor(theme.colors.mainCaptionText)
                         if !message.text.isEmpty {
                             textView(message.text)
                                 .font(.caption2)
                                 .lineLimit(1)
-                                .foregroundColor(theme.colors.textLightContext)
+                                .foregroundColor(theme.colors.mainText)
                         }
                     }
                     .padding(.vertical, inputViewTheme.viewOnTop.verticalPadding)
@@ -260,13 +314,14 @@ struct InputView: View {
                     if let _ = message.recording {
                         theme.images.inputView.microphone
                             .renderingMode(.template)
-                            .foregroundColor(theme.colors.buttonBackground)
+                            .foregroundColor(theme.colors.mainTint)
                     }
 
                     theme.images.reply.cancelReply
                         .onTapGesture {
                             viewModel.attachments.replyMessage = nil
                         }
+                        .foregroundStyle(theme.colors.sendButtonBackground)
                 }
                 .padding(.horizontal, inputViewTheme.viewOnTop.horizontalPadding)
             }
@@ -304,36 +359,35 @@ struct InputView: View {
         } label: {
             theme.images.inputView.add
                 .viewSize(inputViewTheme.addButton.viewSize)
-//                .circleBackground(theme.colors.addButtonBackground)
+//                .circleBackground(theme.colors.sendButtonBackground)
                 .padding(inputViewTheme.addButton.padding)
         }
     }
 
-    var addAttachmentButton: some View {
-        Menu {
-            Button {
-                onAction(.camera)
-            } label: {
-                Label("Camera", systemImage: "camera")
-            }
-            Button {
-                onAction(.photo)
-            } label: {
-                Label("Photos", systemImage: "photo.stack")
-            }
-            Button {
-                onAction(.document)
-            } label: {
-                Label("Files", systemImage: "folder")
-            }
-        } label: {
-            theme.images.inputView.add
-                .viewSize(inputViewTheme.addAttachmentButton.viewSize)
-//                .circleBackground(theme.colors.addButtonBackground)
-                .padding(inputViewTheme.addAttachmentButton.padding)
-        }
-    }
-
+		var addAttachmentButton: some View {
+		        Menu {
+		            Button {
+		                onAction(.camera)
+		            } label: {
+		                Label("Camera", systemImage: "camera")
+		            }
+		            Button {
+		                onAction(.photo)
+		            } label: {
+		                Label("Photos", systemImage: "photo.stack")
+		            }
+		            Button {
+		                onAction(.document)
+		            } label: {
+		                Label("Files", systemImage: "folder")
+		            }
+		        } label: {
+		            theme.images.inputView.add
+		                .viewSize(inputViewTheme.addAttachmentButton.viewSize)
+		//                .circleBackground(theme.colors.addButtonBackground)
+		                .padding(inputViewTheme.addAttachmentButton.padding)
+		        }
+	    }
     var cameraButton: some View {
         Button {
             onAction(.camera)
@@ -414,9 +468,11 @@ struct InputView: View {
             } label: {
                 HStack {
                     theme.images.recordAudio.cancelRecord
-                    Text("Cancel")
+                        .renderingMode(.template)
+                        .foregroundStyle(theme.colors.mainText)
+                    Text(localization.cancelButtonText)
                         .font(.footnote)
-                        .foregroundColor(theme.colors.textLightContext)
+                        .foregroundColor(theme.colors.mainText)
                 }
             }
             Spacer()
@@ -426,9 +482,9 @@ struct InputView: View {
     var recordingInProgress: some View {
         HStack {
             Spacer()
-            Text("Recording...")
+            Text(localization.recordingText)
                 .font(.footnote)
-                .foregroundColor(theme.colors.textLightContext)
+                .foregroundColor(theme.colors.mainText)
             Spacer()
         }
     }
@@ -444,7 +500,7 @@ struct InputView: View {
 
     var recordDuration: some View {
         Text(DateFormatter.timeString(Int(viewModel.attachments.recording?.duration ?? 0)))
-            .foregroundColor(theme.colors.textLightContext)
+            .foregroundColor(theme.colors.mainText)
             .opacity(inputViewTheme.recordDuration.opacity)
             .font(.system(size: inputViewTheme.recordDuration.fontSize))
             .monospacedDigit()
@@ -453,7 +509,7 @@ struct InputView: View {
 
     var recordDurationLeft: some View {
         Text(DateFormatter.timeString(Int(recordingPlayer.secondsLeft)))
-            .foregroundColor(theme.colors.textLightContext)
+            .foregroundColor(theme.colors.mainText)
             .opacity(0.6)
             .font(.caption2)
             .monospacedDigit()
@@ -466,6 +522,7 @@ struct InputView: View {
         } label: {
             theme.images.recordAudio.playRecord
         }
+        .tint(theme.colors.mainText)
     }
 
     var pauseRecordButton: some View {
@@ -474,6 +531,7 @@ struct InputView: View {
         } label: {
             theme.images.recordAudio.pauseRecord
         }
+        .tint(theme.colors.mainText)
     }
 
     @ViewBuilder
@@ -489,30 +547,18 @@ struct InputView: View {
                 }
                 .frame(width: 20)
 
-                RecordWaveformPlaying(
-                    samples: samples,
-                    progress: recordingPlayer.progress,
-                    color: theme.colors.textLightContext,
-                    addExtraDots: inputViewTheme.recordWaveform.extraDots
-                )
+                RecordWaveformPlaying(samples: samples, progress: recordingPlayer.progress, color: theme.colors.mainText, addExtraDots: true) { progress in
+                    recordingPlayer.seek(with: viewModel.attachments.recording!, to: progress)
+                }
             }
             .padding(.horizontal, 8)
-        }
-    }
-
-    var fieldBackgroundColor: Color {
-        switch style {
-        case .message:
-            return theme.colors.inputLightContextBackground
-        case .signature:
-            return theme.colors.inputDarkContextBackground
         }
     }
 
     var backgroundColor: Color {
         switch style {
         case .message:
-            return theme.colors.mainBackground
+            return theme.colors.mainBG
         case .signature:
             return pickerTheme.main.albumSelectionBackground
         }

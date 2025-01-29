@@ -46,8 +46,15 @@
 - Allows you to pass a custom view builder for messages and input views
 - Has a built-in photo and video library/camera picker for multiple media asset selection
 - Can display a fullscreen menu on long press a message cell (automatically shows scroll for big messages)
-- Supports "reply to message" via message menu. Remove and edit are **coming soon**
-- Supports voice recording, video/photo and text. More content types are **coming soon**
+- Supports "reply to message" via message menu or through a closure. Remove and edit are **coming soon**
+- This library allows to send the following content in messages in any combination:
+    - Text with/without markdown
+    - Photo/video
+    - Audio recording
+    **Coming soon:**
+    - User's location
+    - Documents
+    - Link with preview
 
 # Usage
 
@@ -65,14 +72,30 @@ where:
    `messages` - list of messages to display  
    `didSendMessage` - a closure which is called when the user presses the send button  
 
-`Message` is a type that `Chat` uses for the internal implementation. In the code above it expects the user to provide a list of `Message` structs, and it returns a `DraftMessage` in the `didSendMessage` closure. You can map it both ways to your own `Message` model that your API expects.
+`Message` is a type that `Chat` uses for the internal implementation. In the code above it expects the user to provide a list of `Message` structs, and it returns a `DraftMessage` in the `didSendMessage` closure. You can map it both ways to your own `Message` model that your API expects or use as is.
 
-## Customization
+## Available chat types
+Chat type - determines the order of messages and direction of new message animation. Available options:
+- `conversation` - the latest message is at the bottom, new messages appear from the bottom  
+- `comments` - the latest message is at the top, new messages appear from the top  
+
+Reply mode - determines how replying to message looks. Available options:
+- `quote` - when replying to message A, new message will appear as the newest message, quoting message A in its body  
+- `answer` - when replying to message A, new message with appear direclty below message A as a separate cell without duplicating message A in its body  
+
+To specify any of these pass them through `init`:
+```swift
+ChatView(messages: viewModel.messages, chatType: .comments, replyMode: .answer) { draft in
+    yourViewModel.send(draft: draft)
+}
+```
+
+## Custom UI
 You may customize message cells like this: 
 ```swift
 ChatView(messages: viewModel.messages) { draft in
     viewModel.send(draft: draft)
-} messageBuilder: { message, positionInGroup, showAttachmentClosure in
+} messageBuilder: { message, positionInUserGroup, positionInCommentsGroup, showContextMenuClosure, messageActionClosure, showAttachmentClosure in
     VStack {
         Text(message.text)
         if !message.attachments.isEmpty {
@@ -85,28 +108,31 @@ ChatView(messages: viewModel.messages) { draft in
 ```
 `messageBuilder`'s parameters:  
 - `message` - the message containing user info, attachments, etc.   
-- `positionInGroup` - the position of the message in its continuous collection of messages from the same user     
+- `positionInUserGroup` - the position of the message in its continuous collection of messages from the same user    
+- `positionInCommentsGroup` - position of message in its continuous group of comments (only works for .answer ReplyMode, nil for .quote mode)  
+- `showContextMenuClosure` - closure to show message context menu   
+- `messageActionClosure ` - closure to pass user interaction, .reply for example   
 - `showAttachmentClosure` - you can pass an attachment to this closure to use ChatView's fullscreen media viewer    
 
 You may customize the input view (a text field with buttons at the bottom) like this: 
 ```swift
 ChatView(messages: viewModel.messages) { draft in
     viewModel.send(draft: draft)
-} inputViewBuilder: { textBinding, attachments, state, style, actionClosure, dismissKeyboardClosure in
+} inputViewBuilder: { textBinding, attachments, inputViewState, inputViewStyle, inputViewActionClosure, dismissKeyboardClosure in
     Group {
-        switch style {
+        switch inputViewStyle {
         case .message: // input view on chat screen
             VStack {
                 HStack {
-                    Button("Send") { actionClosure(.send) }
-                    Button("Attach") { actionClosure(.photo) }
+                    Button("Send") { inputViewActionClosure(.send) }
+                    Button("Attach") { inputViewActionClosure(.photo) }
                 }
                 TextField("Write your message", text: textBinding)
             }
         case .signature: // input view on photo selection screen
             VStack {
                 HStack {
-                    Button("Send") { actionClosure(.send) }
+                    Button("Send") { inputViewActionClosure(.send) }
                 }
                 TextField("Compose a signature for photo", text: textBinding)
                     .background(Color.green)
@@ -118,40 +144,127 @@ ChatView(messages: viewModel.messages) { draft in
 `inputViewBuilder`'s parameters:  
 - `textBinding` to bind your own TextField   
 - `attachments` is a struct containing photos, videos, recordings and a message you are replying to     
-- `state` - the state of the input view that is controled by the library automatically if possible or through your calls of `actionClosure`
-- `style` - `.message` or `.signature` (the chat screen or the photo selection screen)   
-- `actionClosure` is called on taps on your custom buttons. For example, call `actionClosure(.send)` if you want to send your message, then the library will reset the text and attachments and call the `didSendMessage` sending closure
-- `dismissKeyboardClosure` - call this to dismiss keyboard
+- `inputViewState` - the state of the input view that is controlled by the library automatically if possible or through your calls of `inputViewActionClosure`
+- `inputViewStyle` - `.message` or `.signature` (the chat screen or the photo selection screen)   
+- `inputViewActionClosure` for calling on taps on your custom buttons. For example, call `inputViewActionClosure(.send)` if you want to send your message with your own button, then the library will reset the text and attachments and call the `didSendMessage` sending closure   
+- `dismissKeyboardClosure` - call this to dismiss keyboard    
 
-## Supported content types
-This library allows to send the following content in messages in any combination:
-- Text with/without markdown
-- Photo/video
-- Audio recording
+## Custom message menu
+Long tap on a message will display a menu for this message (can be turned off, see Modifiers). To define custom message menu actions declare an enum conforming to `MessageMenuAction`. Then the library will show your custom menu options on long tap on message instead of default ones, if you pass your enum's name to it (see code sample). Once the action is selected special callbcak will be called. Here is a simple example:
+```swift
+enum Action: MessageMenuAction {
+    case reply, edit
 
-**Coming soon:**
-- User's location
-- Documents
+    func title() -> String {
+        switch self {
+        case .reply:
+            "Reply"
+        case .edit:
+            "Edit"
+        }
+    }
+    
+    func icon() -> Image {
+        switch self {
+        case .reply:
+            Image(systemName: "arrowshape.turn.up.left")
+        case .edit:
+            Image(systemName: "square.and.pencil")
+        }
+    }
+}
 
-### Modifiers
-If you are not using your own `messageBuilder`:   
-`type` - type of chat, available options:      
-    - chat: input view and the latest message at the bottom      
-    - comments: input view and the latest message on top    
+ChatView(messages: viewModel.messages) { draft in
+    viewModel.send(draft: draft)
+} messageMenuAction: { (action: Action, defaultActionClosure, message) in // <-- here: specify the name of your `MessageMenuAction` enum
+    switch action {
+    case .reply:
+        defaultActionClosure(message, .reply)
+    case .edit:
+        defaultActionClosure(message, .edit { editedText in
+            // update this message's text on your BE
+            print(editedText)
+        })
+    }
+}
+```
+`messageMenuAction`'s parameters:  
+- `selectedMenuAction` - action selected by the user from the menu. NOTE: when declaring this variable, specify its type (your custom descendant of MessageMenuAction) explicitly    
+- `defaultActionClosure` - a closure taking a case of default implementation of MessageMenuAction which provides simple actions handlers; you call this closure passing the selected message and choosing one of the default actions (.reply, .edit) if you need them; or you can write a custom implementation for all your actions, in that case just ignore this closure
+- `message` - message for which the menu is displayed
+    
+When implementing your own `MessageMenuActionClosure`, write a switch statement passing through all the cases of your `MessageMenuAction`, inside each case write your own action handler, or call the default one. NOTE: not all default actions work out of the box - e.g. for `.edit` you'll still need to provide a closure to save the edited text on your BE. Please see CommentsExampleView in ChatExample project for MessageMenuActionClosure usage example.
+
+## Small view builders:
+These use `AnyView`, so please try to keep them easy enough
+- `betweenListAndInputViewBuilder` - content to display in between the chat list view and the input view   
+- `mainHeaderBuilder` - a header for the whole chat, which will scroll together with all the messages and headers  
+- `headerBuilder` - date section header builder   
+
+## Modifiers 
+`isListAboveInputView` - messages table above the input field view or not   
 `showDateHeaders` - show section headers with dates between days, default is `true`    
-`avatarSize` - the default avatar is a circle, you can specify its diameter here   
+`isScrollEnabled` - forbid scrolling for messages' `UITabelView`   
 `showMessageMenuOnLongPress` - turn menu on long tap on/off    
-`tapAvatarClosure` - closure to call on avatar tap   
-`messageUseMarkdown` - whether the default message cell uses markdown    
-`mediaPickerSelectionParameters`  - a struct holding MediaPicker selection parameters (mediaType, selectionStyle, etc.)
-`assetsPickerLimit` - the maximum media count that the user can select in the media picker      
-`enableLoadMore(offset: Int, handler: @escaping ChatPaginationClosure)` - when user scrolls to `offset`-th message from the end, call the handler function, so the user can load more messages       
-`chatNavigation(title: String, status: String? = nil, cover: URL? = nil)` - pass the info for the Chat's navigation bar 
-`showMessageTimeView` - show timestamp in a corner of message   
-`messageFont` - pass cutom font to use for messages    
-`availablelInput` - full (camera + attachments + text + audio) or textAndAudio
+`showNetworkConnectionProblem` - display network error on/off    
+`assetsPickerLimit` - set a limit for MediaPicker built into the library   
+`setMediaPickerSelectionParameters` - a struct holding MediaPicker selection parameters (assetsPickerLimit and others like mediaType, selectionStyle, etc.).   
+`orientationHandler` - handle screen rotation
 
+`enableLoadMore(offset: Int, handler: @escaping ChatPaginationClosure)` - when user scrolls to `offset`-th message from the end, call the handler function, so the user can load more messages. NOTE: New messages won't appear in the chat unless it's scrolled up to the very top - it's an optimization. 
+
+### Customize default UI
+You can use `chatTheme` to customize colors and images of default UI. You can pass all/some colors and images:
+
+```swift
+.chatTheme(
+    ChatTheme(
+        colors: .init(
+            mainBackground: .red,
+            buttonBackground: .yellow,
+            addButtonBackground: .purple
+        ),
+        images: .init(
+            camera: Image(systemName: "camera")
+        )
+    )
+)
+```
+Please use `mediaPickerTheme` in a similar fashion to customize the built-in photo picker.      
+
+### makes sense only for built-in message view
+`avatarSize` - the default avatar is a circle, you can specify its diameter here 
+`tapAvatarClosure` - closure to call on avatar tap   
+`messageUseMarkdown` - use markdown (e.g. ** to make something bold) or not
+`showMessageTimeView` - show timestamp in a corner of the message   
+`setMessageFont` - pass custom font to use for messages   
+
+### makes sense only for built-in input view
+`setAvailableInput` - hide some buttons in default InputView. Available options are:
+    - `.full` - media + text + audio   
+    - `.textAndMedia`   
+    - `.textAndAudio`   
+    - `.textOnly`    
+  
 <img src="https://raw.githubusercontent.com/exyte/media/master/Chat/pic2.png" width="300">
+
+## Localization
+You can localize the library by providing your own strings by providing a `ChatLocalization` struct. Here is an example:
+```swift
+ChatLocalization(
+        inputPlaceholder: "Type a message...",
+        signatureText: "Add signature...",
+        cancelButtonText: "Cancel",
+        recentToggleText: "Recents",
+        waitingForNetwork: "Waiting for network",
+        recordingText: "Recording..."
+    )
+```
+
+Then pass the modifier:
+```swift
+.setChatLocalization(localization)
+```
 
 ## Examples
 There are 2 example projects:    
@@ -203,13 +316,16 @@ github "Exyte/Chat"
 ## Our other open source SwiftUI libraries
 [PopupView](https://github.com/exyte/PopupView) - Toasts and popups library    
 [Grid](https://github.com/exyte/Grid) - The most powerful Grid container    
-[ScalingHeaderScrollView](https://github.com/exyte/ScalingHeaderScrollView) - A scroll view with a sticky header which shrinks as you scroll  
-[AnimatedTabBar](https://github.com/exyte/AnimatedTabBar) - A tabbar with number of preset animations         
+[ScalingHeaderScrollView](https://github.com/exyte/ScalingHeaderScrollView) - A scroll view with a sticky header which shrinks as you scroll    
+[AnimatedTabBar](https://github.com/exyte/AnimatedTabBar) - A tabbar with a number of preset animations   
 [MediaPicker](https://github.com/exyte/mediapicker) - Customizable media picker     
+[OpenAI](https://github.com/exyte/OpenAI) Wrapper lib for [OpenAI REST API](https://platform.openai.com/docs/api-reference/introduction)    
+[AnimatedGradient](https://github.com/exyte/AnimatedGradient) - Animated linear gradient     
 [ConcentricOnboarding](https://github.com/exyte/ConcentricOnboarding) - Animated onboarding flow    
-[FloatingButton](https://github.com/exyte/FloatingButton) - Floating button menu      
+[FloatingButton](https://github.com/exyte/FloatingButton) - Floating button menu    
 [ActivityIndicatorView](https://github.com/exyte/ActivityIndicatorView) - A number of animated loading indicators    
 [ProgressIndicatorView](https://github.com/exyte/ProgressIndicatorView) - A number of animated progress indicators    
+[FlagAndCountryCode](https://github.com/exyte/FlagAndCountryCode) - Phone codes and flags for every country    
 [SVGView](https://github.com/exyte/SVGView) - SVG parser    
 [LiquidSwipe](https://github.com/exyte/LiquidSwipe) - Liquid navigation animation    
 

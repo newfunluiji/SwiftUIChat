@@ -1,6 +1,6 @@
 //
 //  ChatNavigationModifier.swift
-//  
+//
 //
 //  Created by Alexandra Afonasova on 12.01.2023.
 //
@@ -11,12 +11,12 @@ struct ChatNavigationModifier: ViewModifier {
 
     @Environment(\.presentationMode) private var presentationMode
     @Environment(\.chatTheme) private var theme
-    
+
     let title: String
     let status: String?
     let cover: URL?
     var hasBack: Bool = true
-    
+
     func body(content: Content) -> some View {
         content
             .navigationBarBackButtonHidden()
@@ -25,7 +25,7 @@ struct ChatNavigationModifier: ViewModifier {
                 infoToolbarItem
             }
     }
-    
+
     private var backButton: some ToolbarContent {
         ToolbarItem(placement: .navigationBarLeading) {
             Button { presentationMode.wrappedValue.dismiss() } label: {
@@ -35,7 +35,7 @@ struct ChatNavigationModifier: ViewModifier {
             }
         }
     }
-    
+
     private var infoToolbarItem: some ToolbarContent {
         ToolbarItem(placement: .principal) {
             HStack {
@@ -47,13 +47,13 @@ struct ChatNavigationModifier: ViewModifier {
                                 .resizable()
                                 .scaledToFill()
                         default:
-                            Rectangle().fill(theme.colors.grayStatus)
+                            Rectangle().fill(theme.colors.mainTint)
                         }
                     }
                     .frame(width: 35, height: 35)
                     .clipShape(Circle())
                 }
-                
+
                 VStack(alignment: .leading, spacing: 0) {
                     Text(LocalizedStringKey(title))
                         .fontWeight(.semibold)
@@ -62,7 +62,7 @@ struct ChatNavigationModifier: ViewModifier {
                     if let status = status {
                         Text(LocalizedStringKey(status))
                             .font(.footnote)
-                            .foregroundColor(theme.colors.grayStatus)
+                            .foregroundColor(theme.colors.statusGray)
                     }
                 }
                 Spacer()
@@ -70,5 +70,5 @@ struct ChatNavigationModifier: ViewModifier {
             .padding(.leading, 10)
         }
     }
-    
+
 }

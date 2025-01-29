@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import ExyteMediaPicker
 
 struct ContentView: View {
     var body: some View {
@@ -16,8 +17,12 @@ struct ContentView: View {
                         )
                     }
                     
-                    NavigationLink("Simple example") {
+                    NavigationLink("Simple chat example") {
                         ChatExampleView(title: "Simple example")
+                    }
+
+                    NavigationLink("Simple comments example") {
+                        CommentsExampleView()
                     }
                 } header: {
                     Text("Basic examples")
@@ -27,5 +32,19 @@ struct ContentView: View {
             .navigationBarTitleDisplayMode(.inline)
         }
         .navigationViewStyle(.stack)
+        
+        .mediaPickerTheme(
+            main: .init(
+                text: .white,
+                albumSelectionBackground: .examplePickerBg,
+                fullscreenPhotoBackground: .examplePickerBg
+            ),
+            selection: .init(
+                emptyTint: .white,
+                emptyBackground: .black.opacity(0.25),
+                selectedTint: .exampleBlue,
+                fullscreenTint: .white
+            )
+        )
     }
 }

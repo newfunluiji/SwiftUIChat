@@ -11,7 +11,7 @@ import ActivityIndicatorView
 
 struct AttachmentsEditor<InputViewContent: View>: View {
 
-    typealias InputViewBuilderClosure = ChatView<EmptyView, InputViewContent>.InputViewBuilderClosure
+    typealias InputViewBuilderClosure = ChatView<EmptyView, InputViewContent, DefaultMessageMenuAction>.InputViewBuilderClosure
 
     @Environment(\.chatTheme) var theme
     @Environment(\.mediaPickerTheme) var pickerTheme
@@ -27,6 +27,7 @@ struct AttachmentsEditor<InputViewContent: View>: View {
     var orientationHandler: MediaPickerOrientationHandler
     var mediaPickerSelectionParameters: MediaPickerParameters?
     var availableInput: AvailableInputType
+    var localization: ChatLocalization
 
     @State private var seleсtedMedias: [Media] = []
     @State private var currentFullscreenMedia: Media?
@@ -59,7 +60,7 @@ struct AttachmentsEditor<InputViewContent: View>: View {
                     inputView
                         .padding(.bottom, g.safeAreaInsets.bottom)
                 }
-                .background(pickerTheme.main.albumSelectionBackground)
+                .background(theme.colors.mainBG)
                 .ignoresSafeArea()
             } cameraSelectionBuilder: { _, cancelClosure, cameraSelectionView in
                 VStack {
@@ -82,7 +83,7 @@ struct AttachmentsEditor<InputViewContent: View>: View {
             .pickerMode($inputViewModel.mediaPickerMode)
             .orientationHandler(orientationHandler)
             .padding(.top)
-            .background(pickerTheme.main.albumSelectionBackground)
+            .background(theme.colors.mainBG)
             .ignoresSafeArea(.all)
             .onChange(of: currentFullscreenMedia) { newValue in
                 assembleSelectedMedia()
@@ -96,6 +97,18 @@ struct AttachmentsEditor<InputViewContent: View>: View {
                     inputViewModel.send()
                 }
             }
+            .mediaPickerTheme(
+                main: .init(
+                    text: theme.colors.mainText,
+                    albumSelectionBackground: theme.colors.mainBG,
+                    fullscreenPhotoBackground: theme.colors.mainBG,
+                    cameraBackground: theme.colors.mainBG,
+                    cameraSelectionBackground: theme.colors.mainBG),
+                selection: .init(
+                    selectedTint: theme.colors.sendButtonBackground,
+                    fullscreenTint: theme.colors.sendButtonBackground
+                )
+            )
         }
     }
 
@@ -113,7 +126,7 @@ struct AttachmentsEditor<InputViewContent: View>: View {
     var inputView: some View {
         Group {
             if let inputViewBuilder = inputViewBuilder {
-                inputViewBuilder($inputViewModel.attachments.text, inputViewModel.attachments, inputViewModel.state, .signature, inputViewModel.inputViewAction()) {
+                inputViewBuilder($inputViewModel.text, inputViewModel.attachments, inputViewModel.state, .signature, inputViewModel.inputViewAction()) {
                     globalFocusState.focus = nil
                 }
             } else {
@@ -122,7 +135,8 @@ struct AttachmentsEditor<InputViewContent: View>: View {
                     inputFieldId: UUID(),
                     style: .signature,
                     availableInput: availableInput,
-                    messageUseMarkdown: messageUseMarkdown
+                    messageUseMarkdown: messageUseMarkdown,
+                    localization: localization
                 )
             }
         }
@@ -135,19 +149,17 @@ struct AttachmentsEditor<InputViewContent: View>: View {
                     seleсtedMedias = []
                     inputViewModel.showPicker = false
                 } label: {
-                    Text("Cancel")
-                        .foregroundColor(.white.opacity(0.7))
+                    Text(localization.cancelButtonText)
                 }
 
                 Spacer()
             }
 
             HStack {
-                Text("Recents")
+                Text(localization.recentToggleText)
                 Image(systemName: "chevron.down")
                     .rotationEffect(Angle(radians: showingAlbums ? .pi : 0))
             }
-            .foregroundColor(.white)
             .onTapGesture {
                 withAnimation {
                     inputViewModel.mediaPickerMode = showingAlbums ? .photos : .albums
@@ -155,6 +167,7 @@ struct AttachmentsEditor<InputViewContent: View>: View {
             }
             .frame(maxWidth: .infinity)
         }
+        .foregroundColor(theme.colors.mainText)
         .padding(.horizontal)
         .padding(.bottom, 5)
     }
@@ -172,7 +185,7 @@ struct AttachmentsEditor<InputViewContent: View>: View {
                 theme.images.mediaPicker.chevronRight
                 Text(chatTitle)
                     .font(.title3)
-                    .foregroundColor(theme.colors.textMediaPicker)
+                    .foregroundColor(theme.colors.mainText)
             }
 
             Spacer()

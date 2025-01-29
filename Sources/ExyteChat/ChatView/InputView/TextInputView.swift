@@ -14,22 +14,23 @@ struct TextInputView: View {
     var inputFieldId: UUID
     var style: InputViewStyle
     var availableInput: AvailableInputType
+    var localization: ChatLocalization
 
     var body: some View {
         TextField("", text: $text, axis: .vertical)
             .customFocus($globalFocusState.focus, equals: .uuid(inputFieldId))
             .placeholder(when: text.isEmpty) {
-                Text(LocalizedStringKey(style.placeholder))
-                    .foregroundColor(Color(red: 1 / 255, green: 22 / 255, blue: 39 / 255, opacity: 1.0))
+                Text(localization.inputPlaceholder)
+                    .foregroundColor(theme.colors.inputPlaceholderText)
             }
-            .foregroundColor(style == .message ? .black : theme.colors.textDarkContext)
+            .foregroundColor(theme.colors.inputText)
             .padding(.vertical, 10)
-            .padding(.leading, availableInput == .textAndAudio ? 12 : 0)
+            .padding(.leading, !availableInput.isMediaAvailable ? 12 : 0)
             .onTapGesture {
                 globalFocusState.focus = .uuid(inputFieldId)
             }
+            .tint(theme.colors.sendButtonBackground)
             .textSelection(.enabled)
             .padding(.leading)
-
     }
 }

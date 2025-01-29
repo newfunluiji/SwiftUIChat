@@ -9,11 +9,56 @@ import SwiftUI
 import FloatingButton
 import enum FloatingButton.Alignment
 
-enum MessageMenuAction {
-    case reply
+public protocol MessageMenuAction: Equatable, CaseIterable {
+    func title() -> String
+    func icon() -> Image
 }
 
-struct MessageMenu<MainButton: View>: View {
+public enum DefaultMessageMenuAction: MessageMenuAction {
+
+    case copy
+    case reply
+    case edit(saveClosure: (String)->Void)
+
+    public func title() -> String {
+        switch self {
+        case .copy:
+            "Copy"
+        case .reply:
+            "Reply"
+        case .edit:
+            "Edit"
+        }
+    }
+
+    public func icon() -> Image {
+        switch self {
+        case .copy:
+            Image(systemName: "doc.on.doc")
+        case .reply:
+            Image(systemName: "arrowshape.turn.up.left")
+        case .edit:
+            Image(systemName: "bubble.and.pencil")
+        }
+    }
+
+    public static func == (lhs: DefaultMessageMenuAction, rhs: DefaultMessageMenuAction) -> Bool {
+        switch (lhs, rhs) {
+        case (.copy, .copy),
+             (.reply, .reply),
+             (.edit(_), .edit(_)):
+            return true
+        default:
+            return false
+        }
+    }
+
+    public static var allCases: [DefaultMessageMenuAction] = [
+        .copy, .reply, .edit(saveClosure: {_ in})
+    ]
+}
+
+struct MessageMenu<MainButton: View, ActionEnum: MessageMenuAction>: View {
 
     @Environment(\.chatTheme) private var theme
 
@@ -22,13 +67,26 @@ struct MessageMenu<MainButton: View>: View {
     var alignment: Alignment
     var leadingPadding: CGFloat
     var trailingPadding: CGFloat
+    var font: UIFont? = nil
+    var onAction: (ActionEnum) -> ()
     var mainButton: () -> MainButton
-    var onAction: (MessageMenuAction) -> ()
 
+    var getFont: Font? {
+        if let font {
+            return Font(font)
+        } else {
+            return nil
+        }
+    }
+    
     var body: some View {
-        FloatingButton(mainButtonView: mainButton().allowsHitTesting(false), buttons: [
-            menuButton(title: "Reply", icon: theme.images.messageMenu.reply, action: .reply)
-        ], isOpen: $isShowingMenu)
+        FloatingButton(
+            mainButtonView: mainButton().allowsHitTesting(false),
+            buttons: ActionEnum.allCases.map {
+                menuButton(title: $0.title(), icon: $0.icon(), action: $0)
+            },
+            isOpen: $isShowingMenu
+        )
         .straight()
         //.mainZStackAlignment(.top)
         .initialOpacity(0)
@@ -39,24 +97,24 @@ struct MessageMenu<MainButton: View>: View {
         .menuButtonsSize($menuButtonsSize)
     }
 
-    func menuButton(title: String, icon: Image, action: MessageMenuAction) -> some View {
+    func menuButton(title: String, icon: Image, action: ActionEnum) -> some View {
         HStack(spacing: 0) {
             if alignment == .left {
                 Color.clear.viewSize(leadingPadding)
             }
 
             ZStack {
-                theme.colors.friendMessage
-                    .background(.ultraThinMaterial)
-                    .environment(\.colorScheme, .light)
-                    .opacity(0.5)
+                theme.colors.messageFriendBG
                     .cornerRadius(12)
                 HStack {
                     Text(title)
-                        .foregroundColor(theme.colors.textLightContext)
+                        .foregroundColor(theme.colors.menuText)
                     Spacer()
                     icon
+                        .renderingMode(.template)
+                        .foregroundStyle(theme.colors.menuText)
                 }
+                .font(getFont)
                 .padding(.vertical, 11)
                 .padding(.horizontal, 12)
             }

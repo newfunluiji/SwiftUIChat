@@ -41,7 +41,7 @@ struct AttachmentCell: View {
             } else {
                 content
                     .overlay {
-                        Text("Unknown")
+                        Text("Unknown", bundle: .module)
                     }
             }
         }
@@ -69,7 +69,7 @@ struct AsyncImageView: View {
         } placeholder: {
             ZStack {
                 Rectangle()
-                    .foregroundColor(theme.colors.inputLightContextBackground)
+                    .foregroundColor(theme.colors.inputBG)
                     .frame(minWidth: 100, minHeight: 100)
                 ActivityIndicator(size: 30, showBackground: false)
             }

@@ -7,7 +7,8 @@ import Combine
 import ExyteMediaPicker
 
 final class InputViewModel: ObservableObject {
-    
+
+    @Published var text = ""
     @Published var attachments = InputViewAttachments()
     @Published var state: InputViewState = .empty
 
@@ -23,8 +24,14 @@ final class InputViewModel: ObservableObject {
 
     private var recorder = Recorder()
 
+    private var saveEditingClosure: ((String) -> Void)?
+
     private var recordPlayerSubscription: AnyCancellable?
     private var subscriptions = Set<AnyCancellable>()
+    
+    func setRecorderSettings(recorderSettings: RecorderSettings = RecorderSettings()) {
+        self.recorder.recorderSettings = recorderSettings
+    }
 
     func onStart() {
         subscribeValidation()
@@ -37,8 +44,11 @@ final class InputViewModel: ObservableObject {
 
     func reset() {
         DispatchQueue.main.async { [weak self] in
-            self?.attachments = InputViewAttachments()
             self?.showPicker = false
+            self?.text = ""
+            self?.saveEditingClosure = nil
+            self?.attachments = InputViewAttachments()
+            self?.subscribeValidation()
             self?.state = .empty
         }
     }
@@ -50,13 +60,18 @@ final class InputViewModel: ObservableObject {
             .store(in: &subscriptions)
     }
 
+    func edit(_ closure: @escaping (String) -> Void) {
+        saveEditingClosure = closure
+        state = .editing
+    }
+
     func inputViewAction() -> (InputViewAction) -> Void {
         { [weak self] in
             self?.inputViewActionInternal($0)
         }
     }
-
-    func inputViewActionInternal(_ action: InputViewAction) {
+    
+    private func inputViewActionInternal(_ action: InputViewAction) {
         switch action {
         case .photo:
             mediaPickerMode = .photos
@@ -101,10 +116,15 @@ final class InputViewModel: ObservableObject {
         case .pauseRecord:
             state = .pausedRecording
             recordingPlayer?.pause()
+        case .saveEdit:
+            saveEditingClosure?(text)
+            reset()
+        case .cancelEdit:
+            reset()
         }
     }
 
-    func recordAudio() {
+    private func recordAudio() {
         if recorder.isRecording {
             return
         }
@@ -129,9 +149,10 @@ private extension InputViewModel {
     func validateDraft() {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            if !self.attachments.text.isEmpty || !self.attachments.medias.isEmpty {
+            guard state != .editing else { return } // special case
+            if !self.text.isEmpty || !self.attachments.medias.isEmpty {
                 self.state = .hasTextOrMedia
-            } else if self.attachments.text.isEmpty,
+            } else if self.text.isEmpty,
                       self.attachments.medias.isEmpty,
                       self.attachments.recording == nil {
                 self.state = .empty
@@ -141,6 +162,11 @@ private extension InputViewModel {
 
     func subscribeValidation() {
         $attachments.sink { [weak self] _ in
+            self?.validateDraft()
+        }
+        .store(in: &subscriptions)
+
+        $text.sink { [weak self] _ in
             self?.validateDraft()
         }
         .store(in: &subscriptions)
@@ -200,7 +226,7 @@ private extension InputViewModel {
         return mapAttachmentsForSend()
             .compactMap { [attachments] _ in
                 DraftMessage(
-                    text: attachments.text,
+                    text: self.text,
                     medias: attachments.medias,
                     files: attachments.files,
                     recording: attachments.recording,
@@ -209,9 +235,9 @@ private extension InputViewModel {
                 )
             }
             .sink { [weak self] draft in
-                DispatchQueue.main.async { [self, draft] in
+                self?.didSendMessage?(draft)
+                DispatchQueue.main.async { [weak self] in
                     self?.showActivityIndicator = false
-                    self?.didSendMessage?(draft)
                     self?.reset()
                 }
             }
