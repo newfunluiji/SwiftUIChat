@@ -149,14 +149,14 @@ struct AttachmentsEditor<InputViewContent: View>: View {
                     seleсtedMedias = []
                     inputViewModel.showPicker = false
                 } label: {
-                    Text(localization.cancelButtonText)
+                    Text(LocalizedStringKey(localization.cancelButtonText))
                 }
 
                 Spacer()
             }
 
             HStack {
-                Text(localization.recentToggleText)
+                Text(LocalizedStringKey(localization.recentToggleText))
                 Image(systemName: "chevron.down")
                     .rotationEffect(Angle(radians: showingAlbums ? .pi : 0))
             }

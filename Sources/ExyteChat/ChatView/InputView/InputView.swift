@@ -131,15 +131,16 @@ struct InputView: View {
                         leftView
                     }
                     middleView
-                    // rightView
-                    rigthOutsideButton
+//                    rightView
+                    rightOutsideButton
                 }
                 .background {
                     RoundedRectangle(cornerRadius: inputViewTheme.inputCornerRadius)
-                        .fill(theme.colors.inputBG)
+                           .stroke(theme.colors.mainTint, lineWidth: 1)
+                           .background(RoundedRectangle(cornerRadius: inputViewTheme.inputCornerRadius).fill(theme.colors.inputBG))
                 }
 
-                rightOutsideButton
+//                rightOutsideButton
             }
             .padding(.horizontal, inputViewTheme.paddingHorizontal)
             .padding(.vertical, inputViewTheme.paddingVertical)
@@ -290,7 +291,7 @@ struct InputView: View {
                         .foregroundColor(theme.colors.messageMyBG)
                         .frame(width: 2)
                     VStack(alignment: .leading) {
-                        Text(localization.replyToText + " " + message.user.name)
+                        Text(LocalizedStringKey(localization.replyToText + " " + message.user.name))
                             .font(.caption2)
                             .foregroundColor(theme.colors.mainCaptionText)
                         if !message.text.isEmpty {
@@ -470,7 +471,7 @@ struct InputView: View {
                     theme.images.recordAudio.cancelRecord
                         .renderingMode(.template)
                         .foregroundStyle(theme.colors.mainText)
-                    Text(localization.cancelButtonText)
+                    Text(LocalizedStringKey(localization.cancelButtonText))
                         .font(.footnote)
                         .foregroundColor(theme.colors.mainText)
                 }
@@ -482,7 +483,7 @@ struct InputView: View {
     var recordingInProgress: some View {
         HStack {
             Spacer()
-            Text(localization.recordingText)
+            Text(LocalizedStringKey(localization.recordingText))
                 .font(.footnote)
                 .foregroundColor(theme.colors.mainText)
             Spacer()

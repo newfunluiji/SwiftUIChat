@@ -278,15 +278,15 @@ public struct ChatTheme {
                 sending: sending ?? Image("sending", bundle: bundle)
             )
 
-            self.messageMenu = MessageMenu(
-                delete: delete ?? Image("delete", bundle: bundle),
-                edit: edit ?? Image("edit", bundle: bundle),
-                forward: forward ?? Image("forward", bundle: bundle),
-                reply: reply ?? Image("reply", bundle: bundle),
-                retry: retry ?? Image("retry", bundle: bundle),
-                save: save ?? Image("save", bundle: bundle),
-                select: select ?? Image("select", bundle: bundle)
-            )
+//            self.messageMenu = MessageMenu(
+//                delete: delete ?? Image("delete", bundle: bundle),
+//                edit: edit ?? Image("edit", bundle: bundle),
+//                forward: forward ?? Image("forward", bundle: bundle),
+//                reply: reply ?? Image("reply", bundle: bundle),
+//                retry: retry ?? Image("retry", bundle: bundle),
+//                save: save ?? Image("save", bundle: bundle),
+//                select: select ?? Image("select", bundle: bundle)
+//            )
 
             self.recordAudio = RecordAudio(
                 cancelRecord: cancelRecord ?? Image("cancelRecord", bundle: bundle),
@@ -330,7 +330,7 @@ public struct InputViewTheme {
 
     public init(
         paddingHorizontal: CGFloat = 20,
-        paddingVertical: CGFloat = 20,
+        paddingVertical: CGFloat = 12,
         inputAreaSpacing: CGFloat = 8,
         inputCornerRadius: CGFloat = 32
     ) {

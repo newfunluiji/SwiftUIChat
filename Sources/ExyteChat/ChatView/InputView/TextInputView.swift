@@ -20,7 +20,7 @@ struct TextInputView: View {
         TextField("", text: $text, axis: .vertical)
             .customFocus($globalFocusState.focus, equals: .uuid(inputFieldId))
             .placeholder(when: text.isEmpty) {
-                Text(localization.inputPlaceholder)
+                Text(LocalizedStringKey(localization.inputPlaceholder))
                     .foregroundColor(theme.colors.inputPlaceholderText)
             }
             .foregroundColor(theme.colors.inputText)

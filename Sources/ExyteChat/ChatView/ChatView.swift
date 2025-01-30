@@ -80,10 +80,9 @@ public struct ChatView<MessageContent: View, InputViewContent: View, MenuAction:
     // MARK: - Parameters
 
     let type: ChatType
-    private let sections: [MessagesSection]
-    private let suggestions: [Suggestion]
-    private let ids: [String]
-    private let didSendMessage: (DraftMessage) -> Void
+    let sections: [MessagesSection]
+    let ids: [String]
+    let didSendMessage: (DraftMessage) -> Void
 
     // MARK: - View builders
 
@@ -161,7 +160,6 @@ public struct ChatView<MessageContent: View, InputViewContent: View, MenuAction:
                 localization: ChatLocalization) {
         self.type = chatType
         self.didSendMessage = didSendMessage
-        self.suggestions = suggestions
         self.sections = ChatView.mapMessages(messages, chatType: chatType, replyMode: replyMode)
         self.ids = messages.map { $0.id }
         self.messageBuilder = messageBuilder
@@ -202,7 +200,7 @@ public struct ChatView<MessageContent: View, InputViewContent: View, MenuAction:
                         inputViewModel.send()
                     }
                 } else {
-                    AttachmentsEditor(inputViewModel: inputViewModel, inputViewBuilder: inputViewBuilder, chatTitle: chatTitle, messageUseMarkdown: messageUseMarkdown, orientationHandler: orientationHandler, mediaPickerSelectionParameters: mediaPickerSelectionParameters, availableInput: availablelInput)
+                    AttachmentsEditor(inputViewModel: inputViewModel, inputViewBuilder: inputViewBuilder, chatTitle: chatTitle, messageUseMarkdown: messageUseMarkdown, orientationHandler: orientationHandler, mediaPickerSelectionParameters: mediaPickerSelectionParameters, availableInput: availablelInput, localization: localization)
                         .environmentObject(globalFocusState)
                 }
             }
@@ -244,7 +242,7 @@ public struct ChatView<MessageContent: View, InputViewContent: View, MenuAction:
             HStack {
                 Spacer()
                 Image("waiting", bundle: .current)
-                Text(localization.waitingForNetwork)
+                Text(LocalizedStringKey(localization.waitingForNetwork))
                 Spacer()
             }
             .padding(.top, 6)
@@ -354,8 +352,8 @@ public struct ChatView<MessageContent: View, InputViewContent: View, MenuAction:
         }
         .onAppear {
             viewModel.didSendMessage = didSendMessage
-            viewModel.inputViewModel.showLeftView = showUploadFilesView
             viewModel.inputViewModel = inputViewModel
+            viewModel.inputViewModel?.showLeftView = showUploadFilesView
             viewModel.globalFocusState = globalFocusState
 
             inputViewModel.didSendMessage = { value in
@@ -634,41 +632,40 @@ public extension ChatView {
     }
 }
 
-public extension ChatView where MessageContent == EmptyView {
-
-    init(messages: [Message],
-         suggestions: [Suggestion] = [],
-         didSendMessage: @escaping (DraftMessage) -> Void,
-         inputViewBuilder: @escaping InputViewBuilderClosure) {
-        self.didSendMessage = didSendMessage
-        self.suggestions = suggestions
-        self.sections = ChatView.mapMessages(messages)
-        self.ids = messages.map { $0.id }
-        self.inputViewBuilder = inputViewBuilder
-    }
-}
-
-public extension ChatView where InputViewContent == EmptyView {
-
-    init(messages: [Message],
-         suggestions: [Suggestion] = [],
-         didSendMessage: @escaping (DraftMessage) -> Void,
-         messageBuilder: @escaping MessageBuilderClosure) {
-        self.didSendMessage = didSendMessage
-        self.suggestions = suggestions
-        self.sections = ChatView.mapMessages(messages)
-        self.ids = messages.map { $0.id }
-        self.messageBuilder = messageBuilder
-    }
-
-public extension ChatView where MessageContent == EmptyView, InputViewContent == EmptyView {
-
-    init(messages: [Message],
-         suggestions: [Suggestion] = [],
-         didSendMessage: @escaping (DraftMessage) -> Void) {
-        self.didSendMessage = didSendMessage
-        self.suggestions = suggestions
-        self.sections = ChatView.mapMessages(messages)
-        self.ids = messages.map { $0.id }
-    }
-}
+//public extension ChatView where MessageContent == EmptyView {
+//
+//    init(messages: [Message],
+//         suggestions: [Suggestion] = [],
+//         didSendMessage: @escaping (DraftMessage) -> Void,
+//         inputViewBuilder: @escaping InputViewBuilderClosure) {
+//        self.didSendMessage = didSendMessage
+//        self.suggestions = suggestions
+////        self.sections = ChatView.mapMessages(messages)
+//        self.ids = messages.map { $0.id }
+//        self.inputViewBuilder = inputViewBuilder
+//    }
+//}
+//
+//public extension ChatView where InputViewContent == EmptyView {
+//
+//    init(messages: [Message],
+//         suggestions: [Suggestion] = [],
+//         didSendMessage: @escaping (DraftMessage) -> Void,
+//         messageBuilder: @escaping MessageBuilderClosure) {
+//        self.didSendMessage = didSendMessage
+//        self.suggestions = suggestions
+////        self.sections = ChatView.mapMessages(messages)
+//        self.ids = messages.map { $0.id }
+//        self.messageBuilder = messageBuilder
+//    }
+//
+//public extension ChatView where MessageContent == EmptyView, InputViewContent == EmptyView {
+//    init(messages: [Message],
+//         suggestions: [Suggestion] = [],
+//         didSendMessage: @escaping (DraftMessage) -> Void) {
+//        self.didSendMessage = didSendMessage
+//        self.suggestions = suggestions
+//        self.sections = ChatView.mapMessages(messages)
+//        self.ids = messages.map { $0.id }
+//    }
+//}
