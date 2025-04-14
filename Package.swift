@@ -1,5 +1,4 @@
-// swift-tools-version: 5.7
-// The swift-tools-version declares the minimum version of Swift required to build this package.
+// swift-tools-version: 5.9
 
 import PackageDescription
 
@@ -7,7 +6,7 @@ let package = Package(
     name: "Chat",
     defaultLocalization: "en",
     platforms: [
-        .iOS(.v16)
+        .iOS(.v17)
     ],
     products: [
         .library(
@@ -16,16 +15,8 @@ let package = Package(
     ],
     dependencies: [
         .package(
-            url: "https://github.com/siteline/swiftui-introspect",
-            from: "1.0.0"
-        ),
-        .package(
             url: "https://github.com/exyte/MediaPicker.git",
-            from: "2.0.0"
-        ),
-        .package(
-            url: "https://github.com/exyte/FloatingButton",
-            from: "1.2.2"
+            from: "3.0.0"
         ),
         .package(
             url: "https://github.com/exyte/ActivityIndicatorView",
@@ -35,16 +26,24 @@ let package = Package(
             url: "https://github.com/markrenaud/FilePicker",
             from: "1.0.1"
         ),
+        .package(
+           url: "https://github.com/Giphy/giphy-ios-sdk",
+           exact: "2.2.12"
+        ),
     ],
     targets: [
         .target(
             name: "ExyteChat",
             dependencies: [
-                .product(name: "SwiftUIIntrospect", package: "swiftui-introspect"),
                 .product(name: "ExyteMediaPicker", package: "MediaPicker"),
+                .product(name: "ActivityIndicatorView", package: "ActivityIndicatorView"),
+                .product(name: "GiphyUISDK", package: "giphy-ios-sdk")
                 .product(name: "FloatingButton", package: "FloatingButton"),
                 .product(name: "ActivityIndicatorView", package: "ActivityIndicatorView"),
                 .product(name: "FilePicker", package: "FilePicker")
+            ],
+            swiftSettings: [
+                .enableExperimentalFeature("StrictConcurrency")
             ]
         ),
         .testTarget(

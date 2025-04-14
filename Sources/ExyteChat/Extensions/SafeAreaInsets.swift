@@ -20,17 +20,9 @@ extension UIApplication {
                 $0.isKeyWindow
             }
     }
-}
 
-private struct SafeAreaInsetsKey: EnvironmentKey {
-    static var defaultValue: EdgeInsets {
+    static var safeArea: EdgeInsets {
         UIApplication.shared.keyWindow?.safeAreaInsets.swiftUiInsets ?? EdgeInsets()
-    }
-}
-
-extension EnvironmentValues {
-    var safeAreaInsets: EdgeInsets {
-        self[SafeAreaInsetsKey.self]
     }
 }
 
@@ -39,3 +31,4 @@ private extension UIEdgeInsets {
         EdgeInsets(top: top, leading: left, bottom: bottom, trailing: right)
     }
 }
+

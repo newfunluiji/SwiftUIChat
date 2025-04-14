@@ -5,7 +5,7 @@
 import Foundation
 import ExyteMediaPicker
 
-public enum AttachmentType: String, Codable {
+public enum AttachmentType: String, Codable, Sendable {
     case file
     case image
     case video
@@ -29,7 +29,7 @@ public enum AttachmentType: String, Codable {
             self = .video
         }
     }
-    
+
     public init(type: String) {
         switch type.lowercased() {
         case "file":
@@ -44,7 +44,7 @@ public enum AttachmentType: String, Codable {
     }
 }
 
-public struct Attachment: Codable, Identifiable, Hashable {
+public struct Attachment: Codable, Identifiable, Hashable, Sendable {
     public let id: String
     public let thumbnail: URL
     public let full: URL

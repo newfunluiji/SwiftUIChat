@@ -7,40 +7,104 @@
 
 import SwiftUI
 
-struct ChatThemeKey: EnvironmentKey {
-    static var defaultValue: ChatTheme = ChatTheme()
-}
-
-extension EnvironmentValues {
+public extension EnvironmentValues {
+    #if swift(>=6.0)
+    @Entry var chatTheme = ChatTheme()
+    @Entry var giphyConfig = GiphyConfiguration()
+    #else
     var chatTheme: ChatTheme {
         get { self[ChatThemeKey.self] }
         set { self[ChatThemeKey.self] = newValue }
     }
+
+    var giphyConfig: GiphyConfiguration {
+        get { self[GiphyConfigurationKey.self] }
+        set { self[GiphyConfigurationKey.self] = newValue }
+    }
+    #endif
 }
 
-public extension View {
-    func chatTheme(_ theme: ChatTheme) -> some View {
+// Define keys only for older versions
+#if swift(<6.0)
+@preconcurrency public struct ChatThemeKey: EnvironmentKey {
+    public static let defaultValue = ChatTheme()
+}
+
+public struct GiphyConfigurationKey: EnvironmentKey {
+    public static let defaultValue = GiphyConfiguration()
+}
+#endif
+
+extension View {
+
+    public func chatTheme(_ theme: ChatTheme) -> some View {
         self.environment(\.chatTheme, theme)
     }
 
-    func chatTheme(colors: ChatTheme.Colors = .init(),
-                   images: ChatTheme.Images = .init()) -> some View {
+    public func chatTheme(
+        colors: ChatTheme.Colors = .init(),
+        images: ChatTheme.Images = .init()
+    ) -> some View {
         self.environment(\.chatTheme, ChatTheme(colors: colors, images: images))
+    }
+
+    public func giphyConfig(_ config: GiphyConfiguration) -> some View {
+        self.environment(\.giphyConfig, config)
     }
 }
 
 public struct ChatTheme {
     public let colors: ChatTheme.Colors
     public let images: ChatTheme.Images
+    public let style: ChatTheme.Style
     public let messageViewTheme: MessageViewTheme
 
 
     public init(colors: ChatTheme.Colors = .init(),
                 images: ChatTheme.Images = .init(),
+                style: ChatTheme.Style = .init(),
                 messageViewTheme: MessageViewTheme = .default) {
-        self.colors = colors
+        self.style = style
         self.images = images
         self.messageViewTheme = messageViewTheme
+
+        // if background images have been set then override the mainBG color to be clear
+        self.colors = if images.backgroundDark != nil && images.backgroundLight != nil {
+            ChatTheme.Colors(copy: colors, mainBG: .clear)
+        } else {
+            colors
+        }
+    }
+
+    internal init(accentColor: Color, images: ChatTheme.Images) {
+        self.init(
+            colors: .init(
+                mainTint: accentColor,
+                messageMyBG: accentColor,
+                messageMyTimeText: Color.white.opacity(0.5),
+                sendButtonBackground: accentColor
+            ),
+            images: images
+        )
+    }
+
+    @available(iOS 18.0, *)
+    internal init(accentColor: Color, background: ThemedBackgroundStyle = .mixedWithAccentColor(), improveContrast: Bool) {
+        let backgroundColor: Color = background.getBackgroundColor(withAccent: accentColor, improveContrast: improveContrast)
+        let friendMessageColor: Color = background.getFriendMessageColor(improveContrast: improveContrast, background: backgroundColor)
+        self.init(
+            colors: .init(
+                mainBG: backgroundColor,
+                mainTint: accentColor,
+                messageMyBG: accentColor,
+                messageMyText: Color.white,
+                messageMyTimeText: Color.white.opacity(0.5),
+                messageFriendBG: friendMessageColor,
+                inputBG: friendMessageColor,
+                menuBG: backgroundColor,
+                sendButtonBackground: accentColor
+            )
+        )
     }
 
     public struct Colors {
@@ -57,9 +121,17 @@ public struct ChatTheme {
         public var messageFriendText: Color
         public var messageFriendTimeText: Color
 
+        public var messageSystemBG: Color
+        public var messageSystemText: Color
+        public var messageSystemTimeText: Color
+
         public var inputBG: Color
         public var inputText: Color
         public var inputPlaceholderText: Color
+
+        public var inputSignatureBG: Color
+        public var inputSignatureText: Color
+        public var inputSignaturePlaceholderText: Color
 
         public var menuBG: Color
         public var menuText: Color
@@ -82,9 +154,15 @@ public struct ChatTheme {
             messageFriendBG: Color = Color("messageFriendBG", bundle: .current),
             messageFriendText: Color = Color("mainText", bundle: .current),
             messageFriendTimeText: Color = Color("messageFriendTimeText", bundle: .current),
+            messageSystemBG: Color = Color("messageFriendBG", bundle: .current),
+            messageSystemText: Color = Color("mainText", bundle: .current),
+            messageSystemTimeText: Color = Color("messageFriendTimeText", bundle: .current),
             inputBG: Color = Color("inputBG", bundle: .current),
             inputText: Color = Color("mainText", bundle: .current),
             inputPlaceholderText: Color = Color("inputPlaceholderText", bundle: .current),
+            inputSignatureBG: Color = Color("inputBG", bundle: .current),
+            inputSignatureText: Color = Color("mainText", bundle: .current),
+            inputSignaturePlaceholderText: Color = Color("inputPlaceholderText", bundle: .current),
             menuBG: Color = Color("menuBG", bundle: .current),
             menuText: Color = Color("menuText", bundle: .current),
             menuTextDelete: Color = Color("menuTextDelete", bundle: .current),
@@ -103,9 +181,15 @@ public struct ChatTheme {
             self.messageFriendBG = messageFriendBG
             self.messageFriendText = messageFriendText
             self.messageFriendTimeText = messageFriendTimeText
+            self.messageSystemBG = messageSystemBG
+            self.messageSystemText = messageSystemText
+            self.messageSystemTimeText = messageSystemTimeText
             self.inputBG = inputBG
             self.inputText = inputText
             self.inputPlaceholderText = inputPlaceholderText
+            self.inputSignatureBG = inputSignatureBG
+            self.inputSignatureText = inputSignatureText
+            self.inputSignaturePlaceholderText = inputSignaturePlaceholderText
             self.menuBG = menuBG
             self.menuText = menuText
             self.menuTextDelete = menuTextDelete
@@ -113,6 +197,35 @@ public struct ChatTheme {
             self.statusGray = statusGray
             self.sendButtonBackground = sendButtonBackground
             self.recordDot = recordDot
+        }
+
+        public init(copy: Colors, mainBG: Color) {
+            self.mainBG = mainBG
+            self.mainTint = copy.mainTint
+            self.mainText = copy.mainText
+            self.mainCaptionText = copy.mainCaptionText
+            self.messageMyBG = copy.messageMyBG
+            self.messageMyText = copy.messageMyText
+            self.messageMyTimeText = copy.messageMyTimeText
+            self.messageFriendBG = copy.messageFriendBG
+            self.messageFriendText = copy.messageFriendText
+            self.messageFriendTimeText = copy.messageFriendTimeText
+            self.messageSystemBG = copy.messageSystemBG
+            self.messageSystemText = copy.messageSystemText
+            self.messageSystemTimeText = copy.messageSystemTimeText
+            self.inputBG = copy.inputBG
+            self.inputText = copy.inputText
+            self.inputPlaceholderText = copy.inputPlaceholderText
+            self.inputSignatureBG = copy.inputSignatureBG
+            self.inputSignatureText = copy.inputSignatureText
+            self.inputSignaturePlaceholderText = copy.inputSignaturePlaceholderText
+            self.menuBG = copy.menuBG
+            self.menuText = copy.menuText
+            self.menuTextDelete = copy.menuTextDelete
+            self.statusError = copy.statusError
+            self.statusGray = copy.statusGray
+            self.sendButtonBackground = copy.sendButtonBackground
+            self.recordDot = copy.recordDot
         }
     }
 
@@ -132,6 +245,7 @@ public struct ChatTheme {
         public struct InputView {
             public var add: Image
             public var arrowSend: Image
+            public var sticker: Image
             public var attach: Image
             public var attachCamera: Image
             public var microphone: Image
@@ -162,6 +276,15 @@ public struct ChatTheme {
             public var sending: Image
         }
 
+        public struct MessageMenu {
+            public var delete: Image
+            public var edit: Image
+            public var forward: Image
+            public var retry: Image
+            public var save: Image
+            public var select: Image
+        }
+
         public struct RecordAudio {
             public var cancelRecord: Image
             public var deleteRecord: Image
@@ -177,6 +300,9 @@ public struct ChatTheme {
             public var replyToMessage: Image
         }
 
+        public var backgroundLight: Image? = nil
+        public var backgroundDark: Image? = nil
+
         public var backButton: Image
         public var scrollToBottom: Image
 
@@ -185,6 +311,7 @@ public struct ChatTheme {
         public var fullscreenMedia: FullscreenMedia
         public var mediaPicker: MediaPicker
         public var message: Message
+        public var messageMenu: MessageMenu
         public var recordAudio: RecordAudio
         public var reply: Reply
 
@@ -200,6 +327,7 @@ public struct ChatTheme {
             pickPhoto: Image? = nil,
             add: Image? = nil,
             arrowSend: Image? = nil,
+            sticker: Image? = nil,
             attach: Image? = nil,
             attachCamera: Image? = nil,
             microphone: Image? = nil,
@@ -219,6 +347,12 @@ public struct ChatTheme {
             playAudio: Image? = nil,
             playVideo: Image? = nil,
             sending: Image? = nil,
+            delete: Image? = nil,
+            edit: Image? = nil,
+            forward: Image? = nil,
+            retry: Image? = nil,
+            save: Image? = nil,
+            select: Image? = nil,
             cancelRecord: Image? = nil,
             deleteRecord: Image? = nil,
             lockRecord: Image? = nil,
@@ -229,10 +363,15 @@ public struct ChatTheme {
             cancelReply: Image? = nil,
             replyToMessage: Image? = nil,
             backButton: Image? = nil,
-            scrollToBottom: Image? = nil
+            scrollToBottom: Image? = nil,
+            backgroundLight: Image? = nil,
+            backgroundDark: Image? = nil
         ) {
             self.backButton = backButton ?? Image("backArrow", bundle: bundle)
             self.scrollToBottom = scrollToBottom ?? Image("scrollToBottom", bundle: bundle)
+
+						self.backgroundLight = backgroundLight
+            self.backgroundDark = backgroundDark
 
             self.attachMenu = AttachMenu(
                 camera: camera ?? Image("camera", bundle: bundle),
@@ -248,6 +387,7 @@ public struct ChatTheme {
             self.inputView = InputView(
                 add: add ?? Image("add", bundle: bundle),
                 arrowSend: arrowSend ?? Image("arrowSend", bundle: bundle),
+                sticker: sticker ?? Image("sticker", bundle: .current),
                 attach: attach ?? Image("attach", bundle: bundle),
                 attachCamera: attachCamera ?? Image("attachCamera", bundle: bundle),
                 microphone: microphone ?? Image("microphone", bundle: bundle)
@@ -288,6 +428,15 @@ public struct ChatTheme {
 //                select: select ?? Image("select", bundle: bundle)
 //            )
 
+            self.messageMenu = MessageMenu(
+                delete: delete ?? Image("delete", bundle: .current),
+                edit: edit ?? Image("edit", bundle: .current),
+                forward: forward ?? Image("forward", bundle: .current),
+                retry: retry ?? Image("retry", bundle: .current),
+                save: save ?? Image("save", bundle: .current),
+                select: select ?? Image("select", bundle: .current)
+            )
+
             self.recordAudio = RecordAudio(
                 cancelRecord: cancelRecord ?? Image("cancelRecord", bundle: bundle),
                 deleteRecord: deleteRecord ?? Image("deleteRecord", bundle: bundle),
@@ -302,6 +451,14 @@ public struct ChatTheme {
                 cancelReply: cancelReply ?? Image("cancelReply", bundle: bundle),
                 replyToMessage: replyToMessage ?? Image("replyToMessage", bundle: bundle)
             )
+        }
+    }
+
+    public struct Style {
+        public var replyOpacity: Double
+
+        public init(replyOpacity: Double = 0.8) {
+            self.replyOpacity = replyOpacity
         }
     }
 }

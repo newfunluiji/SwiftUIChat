@@ -36,25 +36,26 @@
 ![](https://img.shields.io/github/v/tag/exyte/Chat?label=Version)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fexyte%2FChat%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/exyte/Chat)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fexyte%2FChat%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/exyte/Chat)
-[![SPM Compatible](https://img.shields.io/badge/SwiftPM-Compatible-brightgreen.svg)](https://swiftpackageindex.com/exyte/Chat)
-[![Cocoapods Compatible](https://img.shields.io/badge/cocoapods-Compatible-brightgreen.svg)](https://cocoapods.org/pods/ExyteChat)
-[![Carthage Compatible](https://img.shields.io/badge/Carthage-compatible-brightgreen.svg?style=flat)](https://github.com/Carthage/Carthage)
+[![SPM](https://img.shields.io/badge/SPM-Compatible-brightgreen.svg)](https://swiftpackageindex.com/exyte/Chat)
+[![Cocoapods](https://img.shields.io/badge/Cocoapods-Deprecated%20after%202.4.2-yellow.svg)](https://cocoapods.org/pods/ExyteChat)
 [![License: MIT](https://img.shields.io/badge/License-MIT-black.svg)](https://opensource.org/licenses/MIT)
 
 # Features
 - Displays your messages with pagination and allows you to create and "send" new messages (sending means calling a closure since user will be the one providing actual API calls)
 - Allows you to pass a custom view builder for messages and input views
 - Has a built-in photo and video library/camera picker for multiple media asset selection
+- Sticker keyboard that integrates with Giphy
 - Can display a fullscreen menu on long press a message cell (automatically shows scroll for big messages)
 - Supports "reply to message" via message menu or through a closure. Remove and edit are **coming soon**
 - This library allows to send the following content in messages in any combination:
-    - Text with/without markdown
+    - Arbitrarily styled text with `AttributedString` or markdown
     - Photo/video
     - Audio recording
+    - Link with preview
+    - Gif/Sticker
     **Coming soon:**
     - User's location
     - Documents
-    - Link with preview
 
 # Usage
 
@@ -95,7 +96,7 @@ You may customize message cells like this:
 ```swift
 ChatView(messages: viewModel.messages) { draft in
     viewModel.send(draft: draft)
-} messageBuilder: { message, positionInUserGroup, positionInCommentsGroup, showContextMenuClosure, messageActionClosure, showAttachmentClosure in
+} messageBuilder: { message, positionInUserGroup, positionInMessagesSection, positionInCommentsGroup, showContextMenuClosure, messageActionClosure, showAttachmentClosure in
     VStack {
         Text(message.text)
         if !message.attachments.isEmpty {
@@ -109,6 +110,7 @@ ChatView(messages: viewModel.messages) { draft in
 `messageBuilder`'s parameters:  
 - `message` - the message containing user info, attachments, etc.   
 - `positionInUserGroup` - the position of the message in its continuous collection of messages from the same user    
+- `positionInMessagesSection` position of message in the section of messages from that day
 - `positionInCommentsGroup` - position of message in its continuous group of comments (only works for .answer ReplyMode, nil for .quote mode)  
 - `showContextMenuClosure` - closure to show message context menu   
 - `messageActionClosure ` - closure to pass user interaction, .reply for example   
@@ -172,6 +174,17 @@ enum Action: MessageMenuAction {
             Image(systemName: "square.and.pencil")
         }
     }
+    
+    // Optional
+    // Implement this method to conditionally include menu actions on a per message basis
+    // The default behavior is to include all menu action items
+    static func menuItems(for message: ExyteChat.Message) -> [Action] {
+        if message.user.isCurrentUser  {
+            return [.edit]
+        } else {
+            return [.reply]
+        }
+    }
 }
 
 ChatView(messages: viewModel.messages) { draft in
@@ -194,6 +207,35 @@ ChatView(messages: viewModel.messages) { draft in
 - `message` - message for which the menu is displayed
     
 When implementing your own `MessageMenuActionClosure`, write a switch statement passing through all the cases of your `MessageMenuAction`, inside each case write your own action handler, or call the default one. NOTE: not all default actions work out of the box - e.g. for `.edit` you'll still need to provide a closure to save the edited text on your BE. Please see CommentsExampleView in ChatExample project for MessageMenuActionClosure usage example.
+
+## Custom swipe actions
+
+```swift
+// Example: Adding Swipe Actions to your ChatView
+ChatView(messages: viewModel.messages) { draft in
+    viewModel.send(draft: draft)
+} 
+.swipeActions(edge: .leading, performsFirstActionWithFullSwipe: false, items: [
+    // SwipeActions are similar to Buttons, they accept an Action and a ViewBuilder
+    SwipeAction(action: onDelete, activeFor: { $0.user.isCurrentUser }, background: .red) {
+        swipeActionButtonStandard(title: "Delete", image: "xmark.bin")
+    },
+    // Set the background color of a SwipeAction in the initializer,
+    // instead of trying to apply a background color in your ViewBuilder
+    SwipeAction(action: onReply, background: .blue) {
+        swipeActionButtonStandard(title: "Reply", image: "arrowshape.turn.up.left")
+    },
+    // SwipeActions can also be selectively shown based on the message,
+    // here we only show the Edit action when the message is from the current sender
+    SwipeAction(action: onEdit, activeFor: { $0.user.isCurrentUser }, background: .gray) {
+        swipeActionButtonStandard(title: "Edit", image: "bubble.and.pencil")
+    }
+])
+```
+`swipeActions`'s parameters:  
+- `edge` - either the leading or trailing edge of the Message
+- `performsFirstActionWithFullSwipe` - if true, a full swipe will trigger the first `SwipeAction` provided in the `items` list
+- `items` - list of `SwipeAction`s to include
 
 ## Small view builders:
 These use `AnyView`, so please try to keep them easy enough
@@ -229,18 +271,36 @@ You can use `chatTheme` to customize colors and images of default UI. You can pa
         )
     )
 )
-```
-Please use `mediaPickerTheme` in a similar fashion to customize the built-in photo picker.      
 
-### makes sense only for built-in message view
-`avatarSize` - the default avatar is a circle, you can specify its diameter here 
-`tapAvatarClosure` - closure to call on avatar tap   
-`messageUseMarkdown` - use markdown (e.g. ** to make something bold) or not
-`showMessageTimeView` - show timestamp in a corner of the message   
+// chat view with a full background image  
+.chatTheme(
+    ChatTheme(
+        colors: .init(
+            buttonBackground: .yellow,
+            addButtonBackground: .purple
+        ),
+        images: .init(
+          backgroundLight: Image("chatBackgroundLight"),
+          backgroundDark: Image("chatBackgroundDark")
+        )
+    )
+)
+
+```
+By default the built-in MediaPicker will be auto-customized using the mosyt logical colors from chatTheme. But you can always use `mediaPickerTheme` in a similar fashion to set your own colors.      
+
+### makes sense only for built-in message view    
+`avatarSize` - the default avatar is a circle, you can specify its diameter here   
+`tapAvatarClosure` - closure to call on avatar tap    
+`messageUseMarkdown` - use markdown (e.g. ** to make something bold) or not    
+`messageUseStyler` - pass a function that converts the message's `String` to the styled `AttributedString`    
+`showMessageTimeView` - show timestamp in a corner of the message    
+`messageLinkPreviewLimit` - limit the maximum number of link previews per message
+`linkPreviewsDisabled` - completely disable message link previews
 `setMessageFont` - pass custom font to use for messages   
 
 ### makes sense only for built-in input view
-`setAvailableInput` - hide some buttons in default InputView. Available options are:
+`setAvailableInput` - hide some buttons in default InputView. Available options are:    
     - `.full` - media + text + audio   
     - `.textAndMedia`   
     - `.textAndAudio`   
@@ -248,23 +308,38 @@ Please use `mediaPickerTheme` in a similar fashion to customize the built-in pho
   
 <img src="https://raw.githubusercontent.com/exyte/media/master/Chat/pic2.png" width="300">
 
-## Localization
-You can localize the library by providing your own strings by providing a `ChatLocalization` struct. Here is an example:
+## Sticker Keyboard
+
+You can pick and send animated gifs via the integrated sticker keyboard. In order to use this functionality a client id must be granted via the [Giphy Developers](https://developers.giphy.com/) site.
+
+To include the sticker keyboard:
+
 ```swift
-ChatLocalization(
-        inputPlaceholder: "Type a message...",
-        signatureText: "Add signature...",
-        cancelButtonText: "Cancel",
-        recentToggleText: "Recents",
-        waitingForNetwork: "Waiting for network",
-        recordingText: "Recording..."
+.setAvailableInputs([.text, .giphy])
+.giphyConfig(
+    GiphyConfiguration(
+        giphyKey: "client id",
+        mediaTypeConfig: [.recents, .gifs, .stickers, .clips],
+        showAttributionMark: true
     )
+)
 ```
 
-Then pass the modifier:
-```swift
-.setChatLocalization(localization)
-```
+To approve a production client Id for your app, Giphy requires that you include a "Powered By GIPHY" attibution mark, see [attribution mark requirement](https://support.giphy.com/hc/en-us/articles/360035158592-What-conditions-does-my-app-project-need-to-meet-in-order-to-get-a-production-API-Key). Setting the showAttributionMark in the GiphyConfiguration struct will include a small overlay image on the giphy picker which meets the requirement needed for a production client key.
+
+
+## Localization
+
+You can localize the inputs using the standard SwiftUI localization process, add the input strings to each languages Localizable.strings file.  
+The library uses the following text that can be localized:
+
+- Type a message...
+- Add signature...
+- Cancel
+- Recents
+- Waiting for network
+- Recording...
+- Reply to
 
 ## Examples
 There are 2 example projects:    
@@ -278,17 +353,16 @@ https://firebase.google.com/docs/firestore/manage-data/add-data
 Create cloud firestore database (for images and voice recordings)
 https://firebase.google.com/docs/storage/web/start
 
-## Example
+## Examples
 
-To try out the Chat examples:
-- Clone the repo `git clone git@github.com:exyte/Chat.git`
-- Open terminal and run `cd <ChatRepo>/Example`
-- Wait for SPM to finish downloading packages
-- Run it!
+To try the Chat examples:
+- Clone the repo `https://github.com/exyte/Chat.git`
+- Open `ChatExample.xcodeproj` or `ChatFirestoreExample.xcodeproj` in the Xcode
+- Try it!
 
 ## Installation
 
-### Swift Package Manager
+### [Swift Package Manager](https://swift.org/package-manager/)
 
 ```swift
 dependencies: [
@@ -296,25 +370,14 @@ dependencies: [
 ]
 ```
 
-### CocoaPods
-
-```ruby
-pod 'ExyteChat'
-```
-
-### Carthage
-
-```ogdl
-github "Exyte/Chat"
-```
-
 ## Requirements
 
-* iOS 16+
-* Xcode 14+
+* iOS 17+
+* Xcode 15+
 
 ## Our other open source SwiftUI libraries
 [PopupView](https://github.com/exyte/PopupView) - Toasts and popups library    
+[AnchoredPopup](https://github.com/exyte/AnchoredPopup) - Anchored Popup grows "out" of a trigger view (similar to Hero animation)   
 [Grid](https://github.com/exyte/Grid) - The most powerful Grid container    
 [ScalingHeaderScrollView](https://github.com/exyte/ScalingHeaderScrollView) - A scroll view with a sticky header which shrinks as you scroll    
 [AnimatedTabBar](https://github.com/exyte/AnimatedTabBar) - A tabbar with a number of preset animations   
@@ -328,4 +391,5 @@ github "Exyte/Chat"
 [FlagAndCountryCode](https://github.com/exyte/FlagAndCountryCode) - Phone codes and flags for every country    
 [SVGView](https://github.com/exyte/SVGView) - SVG parser    
 [LiquidSwipe](https://github.com/exyte/LiquidSwipe) - Liquid navigation animation    
+
 
