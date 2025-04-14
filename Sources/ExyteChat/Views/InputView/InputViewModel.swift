@@ -231,66 +231,21 @@ private extension InputViewModel {
 
 private extension InputViewModel {
 
-    func mapAttachmentsForSend() -> AnyPublisher<[Attachment], Never> {
-        attachments.medias.publisher
-            .receive(on: DispatchQueue.global())
-            .asyncMap { media in
-                guard let thumbnailURL = await media.getThumbnailURL() else {
-                    return nil
-                }
-
-                switch media.type {
-                case .image:
-                    return Attachment(id: UUID().uuidString, url: thumbnailURL, type: .image)
-                case .video:
-                    guard let fullURL = await media.getURL() else {
-                        return nil
-                    }
-                    return Attachment(id: UUID().uuidString, thumbnail: thumbnailURL, full: fullURL, type: .video)
-                }
-            }
-            .compactMap {
-                $0
-            }
-            .collect()
-            .eraseToAnyPublisher()
-    }
-    
-    func sendMessage() -> AnyCancellable {
+    func sendMessage() {
         showActivityIndicator = true
-        return mapAttachmentsForSend()
-            .compactMap { [attachments] _ in
-                DraftMessage(
-                    text: self.text,
-                    medias: attachments.medias,
-                    files: attachments.files,
-                    giphyMedia: attachments.giphyMedia,
-                    recording: attachments.recording,
-                    replyMessage: attachments.replyMessage,
-                    createdAt: Date()
-                )
-            }
-            .sink { [weak self] draft in
-                self?.didSendMessage?(draft)
-                DispatchQueue.main.async { [weak self] in
-                    self?.showActivityIndicator = false
-                    self?.reset()
-                }
-            }
-    }
-}
-
-extension Publisher {
-    func asyncMap<T>(
-        _ transform: @escaping (Output) async -> T
-    ) -> Publishers.FlatMap<Future<T, Never>, Self> {
-        flatMap { value in
-            Future { promise in
-                Task {
-                    let output = await transform(value)
-                    promise(.success(output))
-                }
-            }
+        let draft = DraftMessage(
+            text: self.text,
+            medias: attachments.medias,
+            files: attachments.files,
+            giphyMedia: attachments.giphyMedia,
+            recording: attachments.recording,
+            replyMessage: attachments.replyMessage,
+            createdAt: Date()
+        )
+        didSendMessage?(draft)
+        DispatchQueue.main.async { [weak self] in
+            self?.showActivityIndicator = false
+            self?.reset()
         }
     }
 }
