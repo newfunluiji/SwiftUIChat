@@ -12,7 +12,6 @@ struct SuggestionView: View {
     @ObservedObject var viewModel: ChatViewModel
     let suggestion: Suggestion
     let tapSuggestionClosure: ChatView.TapSuggestionClosure?
-    let messageUseMarkdown: Bool
     var font: UIFont
     var themeView: SuggestionViewTheme = .default 
 
@@ -33,13 +32,16 @@ struct SuggestionView: View {
     func bubbleView(_ suggestion: Suggestion) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             if !suggestion.label.isEmpty {
-                let messageView = MessageTextView(text: suggestion.label, messageUseMarkdown: messageUseMarkdown)
-                    .fixedSize(horizontal: false, vertical: false)
-                    .padding(themeView.messagePadding)
+//                let messageView = MessageTextView(
+//                    text: suggestion.label, messageStyler: messageStyler,
+//                    userType: message.user.type, messageLinkPreviewLimit: messageLinkPreviewLimit
+//                )
+//                    .fixedSize(horizontal: false, vertical: false)
+//                    .padding(themeView.messagePadding)
                 Spacer()
                 HStack(alignment: .lastTextBaseline, spacing: themeView.bubbleSpacing) {
                     Spacer()
-                    messageView
+//                    messageView
                     Spacer()
                 }
                 .padding(.horizontal, themeView.horizontalPadding)
@@ -111,7 +113,6 @@ struct SuggestionView_Preview: PreviewProvider {
                         viewModel: ChatViewModel(),
                         suggestion: $0,
                         tapSuggestionClosure: nil,
-                        messageUseMarkdown: true,
                         font: UIFontMetrics.default.scaledFont(for: UIFont.systemFont(ofSize: 15))
                     )
                 }

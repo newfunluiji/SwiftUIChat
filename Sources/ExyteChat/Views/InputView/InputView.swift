@@ -82,8 +82,7 @@ struct InputView: View {
     @ObservedObject var viewModel: InputViewModel
     var inputFieldId: UUID
     var style: InputViewStyle
-    var availableInput: AvailableInputType
-    var messageUseMarkdown: Bool
+    var availableInputs: [AvailableInputType]
     var inputViewTheme = InputViewTheme.default
     var messageStyler: (String) -> AttributedString
     var recorderSettings: RecorderSettings = RecorderSettings()
@@ -306,7 +305,7 @@ struct InputView: View {
                     Spacer()
 
                     if let first = message.attachments.first {
-                        AsyncImageView(url: first.thumbnail)
+                        AsyncImageView(url: first.thumbnail, size: CGSize(width: inputViewTheme.viewOnTop.attachment.viewSize, height: inputViewTheme.viewOnTop.attachment.viewSize))
                             .viewSize(inputViewTheme.viewOnTop.attachment.viewSize)
                             .cornerRadius(inputViewTheme.viewOnTop.attachment.cornerRadius)
                             .padding(.trailing, inputViewTheme.viewOnTop.attachment.trailingPadding)
@@ -331,17 +330,18 @@ struct InputView: View {
 
     @ViewBuilder
     func textView(_ text: String) -> some View {
-        if messageUseMarkdown,
-           let attributed = try? AttributedString(markdown: text) {
-            Text(attributed)
-                .font(.system(size: inputViewTheme.textView.fontSize))
-                .lineLimit(inputViewTheme.textView.lineLimit)
-        } else {
-            Text(text)
-                .font(.system(size: inputViewTheme.textView.fontSize))
-                .lineLimit(inputViewTheme.textView.lineLimit)
-//                Text(text.styled(using: messageStyler))
-        }
+        Text(text.styled(using: messageStyler))
+//        if messageUseMarkdown,
+//           let attributed = try? AttributedString(markdown: text) {
+//            Text(attributed)
+//                .font(.system(size: inputViewTheme.textView.fontSize))
+//                .lineLimit(inputViewTheme.textView.lineLimit)
+//        } else {
+//            Text(text)
+//                .font(.system(size: inputViewTheme.textView.fontSize))
+//                .lineLimit(inputViewTheme.textView.lineLimit)
+////                Text(text.styled(using: messageStyler))
+//        }
     }
 
     var attachButton: some View {

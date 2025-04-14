@@ -45,7 +45,6 @@ struct MessageView: View {
     static let horizontalBubblePadding: CGFloat = 70
 
     var messageViewTheme: MessageViewTheme = .default
-    var font: UIFont
 
     enum DateArrangement {
         case hstack, vstack, overlay
@@ -66,9 +65,9 @@ struct MessageView: View {
 
         let maxWidth = message.attachments.isEmpty ? widthWithoutMedia : messageViewTheme.widthWithMedia - textPaddings
         let styledText = message.text.styled(using: messageStyler)
-        let finalWidth = message.text.width(withConstrainedWidth: maxWidth, font: font, messageUseMarkdown: messageUseMarkdown)
-        let lastLineWidth = message.text.lastLineWidth(labelWidth: maxWidth, font: font, messageUseMarkdown: messageUseMarkdown)
-        let numberOfLines = message.text.numberOfLines(labelWidth: maxWidth, font: font, messageUseMarkdown: messageUseMarkdown)
+//        let finalWidth = message.text.width(withConstrainedWidth: maxWidth, font: font)
+//        let lastLineWidth = message.text.lastLineWidth(labelWidth: maxWidth, font: font)
+//        let numberOfLines = message.text.numberOfLines(labelWidth: maxWidth, font: font)
 
         let finalWidth = styledText.width(withConstrainedWidth: maxWidth, font: font)
         let lastLineWidth = styledText.lastLineWidth(labelWidth: maxWidth, font: font)

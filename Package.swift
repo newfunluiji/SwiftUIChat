@@ -37,14 +37,12 @@ let package = Package(
             dependencies: [
                 .product(name: "ExyteMediaPicker", package: "MediaPicker"),
                 .product(name: "ActivityIndicatorView", package: "ActivityIndicatorView"),
-                .product(name: "GiphyUISDK", package: "giphy-ios-sdk")
-                .product(name: "FloatingButton", package: "FloatingButton"),
-                .product(name: "ActivityIndicatorView", package: "ActivityIndicatorView"),
+                .product(name: "GiphyUISDK", package: "giphy-ios-sdk"),
                 .product(name: "FilePicker", package: "FilePicker")
             ],
-            swiftSettings: [
-                .enableExperimentalFeature("StrictConcurrency")
-            ]
+             swiftSettings: [
+                 .enableExperimentalFeature("StrictConcurrency")
+                 ]
         ),
         .testTarget(
             name: "ExyteChatTests",

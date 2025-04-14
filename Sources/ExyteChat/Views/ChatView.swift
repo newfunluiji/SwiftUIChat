@@ -74,7 +74,6 @@ public struct ChatView<MessageContent: View, InputViewContent: View, MenuAction:
 
     public typealias TapSuggestionClosure = (Suggestion) -> ()
 
-    @Environment(\.safeAreaInsets) private var safeAreaInsets
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.chatTheme) private var theme
     @Environment(\.giphyConfig) private var giphyConfig
@@ -116,7 +115,6 @@ public struct ChatView<MessageContent: View, InputViewContent: View, MenuAction:
     var showDateHeaders: Bool = true
     var isScrollEnabled: Bool = true
     var avatarSize: CGFloat = 32
-    var messageUseMarkdown: Bool = false
     var showUploadFilesView: Bool = false
     var messageStyler: (String) -> AttributedString = AttributedString.init
     var showMessageMenuOnLongPress: Bool = true
@@ -433,7 +431,7 @@ public struct ChatView<MessageContent: View, InputViewContent: View, MenuAction:
             message: row.message,
             cellFrame: cellFrame,
 //            menuButtonsSize: $menuButtonsSize,
-            alignment: row.message.user.isCurrentUser ? .right : .left,
+            alignment: menuAlignment(row.message, chatType: type),
             positionInUserGroup: row.positionInUserGroup,
             leadingPadding: avatarSize + theme.messageViewTheme.horizontalAvatarPadding * 2,
             trailingPadding: theme.messageViewTheme.statusViewSize + theme.messageViewTheme.horizontalStatusPadding,
@@ -644,7 +642,7 @@ public extension ChatView {
         return view
     }
 
-		@available(*, deprecated)
+    @available(*, deprecated)
     func chatNavigation(title: String, status: String? = nil, cover: URL? = nil, hasBackButton: Bool = true) -> some View {
         var view = self
         view.chatTitle = title
@@ -686,8 +684,6 @@ public extension ChatView {
         view.messageLinkPreviewLimit = limit
         return view
     }
-
-    func setChatLocalization(_ localization: ChatLocalization) -> ChatView {
 
     func linkPreviewsDisabled() -> ChatView {
         return messageLinkPreviewLimit(0)
@@ -754,6 +750,7 @@ public extension ChatView {
         )
         return view
     }
+
 }
 
 //public extension ChatView where MessageContent == EmptyView {

@@ -231,7 +231,32 @@ private extension InputViewModel {
 
 private extension InputViewModel {
 
-    func sendMessage() {
+    func mapAttachmentsForSend() -> AnyPublisher<[Attachment], Never> {
+        attachments.medias.publisher
+            .receive(on: DispatchQueue.global())
+            .asyncMap { media in
+                guard let thumbnailURL = await media.getThumbnailURL() else {
+                    return nil
+                }
+
+                switch media.type {
+                case .image:
+                    return Attachment(id: UUID().uuidString, url: thumbnailURL, type: .image)
+                case .video:
+                    guard let fullURL = await media.getURL() else {
+                        return nil
+                    }
+                    return Attachment(id: UUID().uuidString, thumbnail: thumbnailURL, full: fullURL, type: .video)
+                }
+            }
+            .compactMap {
+                $0
+            }
+            .collect()
+            .eraseToAnyPublisher()
+    }
+    
+    func sendMessage() -> AnyCancellable {
         showActivityIndicator = true
         return mapAttachmentsForSend()
             .compactMap { [attachments] _ in
