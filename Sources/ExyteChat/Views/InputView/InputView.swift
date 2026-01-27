@@ -66,7 +66,7 @@ public enum AvailableInputType: Sendable {
 
 public struct InputViewAttachments {
     public var medias: [Media] = []
-    public var files: [URL] = []
+    public var files: [FileAttachment] = []
     public var recording: Recording?
     public var giphyMedia: GPHMedia?
     public var replyMessage: ReplyMessage?
@@ -112,6 +112,8 @@ struct InputView: View {
     var body: some View {
         VStack {
             viewOnTop
+            attachedMediaView
+            attachedFilesView
             HStack(alignment: .bottom, spacing: inputViewTheme.inputAreaSpacing) {
                 HStack(alignment: .bottom, spacing: 0) {
                     if viewModel.showLeftView {
@@ -277,6 +279,24 @@ struct InputView: View {
     }
 
     @ViewBuilder
+    var attachedMediaView: some View {
+        if !viewModel.attachments.medias.isEmpty {
+            AttachedMediaView(medias: viewModel.attachments.medias) { mediaId in
+                viewModel.removeMedia(id: mediaId)
+            }
+        }
+    }
+    
+    @ViewBuilder
+    var attachedFilesView: some View {
+        if !viewModel.attachments.files.isEmpty {
+            AttachedFilesContainer(files: viewModel.attachments.files) { fileId in
+                viewModel.removeFile(id: fileId)
+            }
+        }
+    }
+
+    @ViewBuilder
     var viewOnTop: some View {
         if let message = viewModel.attachments.replyMessage {
             VStack(spacing: inputViewTheme.viewOnTop.horizontalSpacing) {
@@ -304,8 +324,8 @@ struct InputView: View {
 
                     Spacer()
 
-                    if let first = message.attachments.first {
-                        AsyncImageView(url: first.thumbnail, size: CGSize(width: inputViewTheme.viewOnTop.attachment.viewSize, height: inputViewTheme.viewOnTop.attachment.viewSize))
+                    if let first = message.attachments.first, let thumbnail = first.thumbnail {
+                        AsyncImageView(url: thumbnail, size: CGSize(width: inputViewTheme.viewOnTop.attachment.viewSize, height: inputViewTheme.viewOnTop.attachment.viewSize))
                             .viewSize(inputViewTheme.viewOnTop.attachment.viewSize)
                             .cornerRadius(inputViewTheme.viewOnTop.attachment.cornerRadius)
                             .padding(.trailing, inputViewTheme.viewOnTop.attachment.trailingPadding)

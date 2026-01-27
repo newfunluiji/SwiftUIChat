@@ -27,7 +27,10 @@ struct ChatMessageView<MessageContent: View>: View {
 
     var body: some View {
         Group {
-            if let messageBuilder = messageBuilder {
+            // Check if this is a system message
+            if case .system(let systemText) = row.message.messageType {
+                SystemMessageView(text: systemText, date: row.message.createdAt)
+            } else if let messageBuilder = messageBuilder {
                 messageBuilder(
                     row.message,
                     row.positionInUserGroup,

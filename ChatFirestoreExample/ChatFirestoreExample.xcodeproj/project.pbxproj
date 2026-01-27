@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3A62A0782F167AE40064C1EE /* ExyteChat in Frameworks */ = {isa = PBXBuildFile; productRef = 3A62A0772F167AE40064C1EE /* ExyteChat */; };
 		5B1A0C362D8D80F30025D1AD /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5B1A0C352D8D80F30025D1AD /* GoogleService-Info.plist */; };
 		5B2D82672A5C1A90009D26A5 /* GroupCreateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B2D82662A5C1A90009D26A5 /* GroupCreateView.swift */; };
 		5B2EC2DF2A528DBB00BD253A /* ConversationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B2EC2DE2A528DBB00BD253A /* ConversationsView.swift */; };
@@ -96,6 +97,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3A62A0782F167AE40064C1EE /* ExyteChat in Frameworks */,
 				5B897B3C2A42C347005274DE /* CachedAsyncImage in Frameworks */,
 				5B9920EE2A4050A300995901 /* FirebaseStorage in Frameworks */,
 				5B580A3E2D9FF6E400F537F1 /* ExyteChat in Frameworks */,
@@ -265,6 +267,7 @@
 				5B897B3B2A42C347005274DE /* CachedAsyncImage */,
 				5B4D05002D92FA73005262A1 /* ExyteChat */,
 				5B580A3D2D9FF6E400F537F1 /* ExyteChat */,
+				3A62A0772F167AE40064C1EE /* ExyteChat */,
 			);
 			productName = ChatFirestoreExample;
 			productReference = 5B57482C2A3707850033C808 /* ChatFirestoreExample.app */;
@@ -297,7 +300,7 @@
 			packageReferences = (
 				5B9920E82A4050A200995901 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				5B897B3A2A42C347005274DE /* XCRemoteSwiftPackageReference "swiftui-cached-async-image" */,
-				5B580A3C2D9FF6E400F537F1 /* XCLocalSwiftPackageReference "../../Chat" */,
+				3A62A0762F167AE40064C1EE /* XCLocalSwiftPackageReference "../../SwiftUIChat" */,
 			);
 			productRefGroup = 5B57482D2A3707850033C808 /* Products */;
 			projectDirPath = "";
@@ -585,9 +588,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		5B580A3C2D9FF6E400F537F1 /* XCLocalSwiftPackageReference "../../Chat" */ = {
+		3A62A0762F167AE40064C1EE /* XCLocalSwiftPackageReference "../../SwiftUIChat" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = ../../Chat;
+			relativePath = ../../SwiftUIChat;
 		};
 /* End XCLocalSwiftPackageReference section */
 
@@ -611,6 +614,10 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		3A62A0772F167AE40064C1EE /* ExyteChat */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ExyteChat;
+		};
 		5B4D05002D92FA73005262A1 /* ExyteChat */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = ExyteChat;

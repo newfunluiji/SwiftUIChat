@@ -228,7 +228,7 @@ public struct ChatView<MessageContent: View, InputViewContent: View, MenuAction:
             .fullScreenCover(isPresented: $inputViewModel.showPicker) {
                 if inputViewModel.attachmentsMode == .documents {
                     FilePickerUIRepresentable(types: [.item], allowMultiple: false){ urls in
-                        inputViewModel.attachments.files = urls
+                        inputViewModel.addFiles(urls)
                         print("selected \(urls.count) files")
                         inputViewModel.send()
                     }
@@ -244,6 +244,14 @@ public struct ChatView<MessageContent: View, InputViewContent: View, MenuAction:
                         localization: localization
                     )
                     .environmentObject(globalFocusState)
+                }
+            }
+            .sheet(isPresented: $inputViewModel.showDocumentPicker) {
+                DocumentPickerView { urls in
+                    inputViewModel.addFiles(urls)
+                    inputViewModel.showDocumentPicker = false
+                } onCancel: {
+                    inputViewModel.showDocumentPicker = false
                 }
             }
 

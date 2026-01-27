@@ -36,6 +36,18 @@ struct AttachmentsEditor<InputViewContent: View>: View {
     var showingAlbums: Bool {
         inputViewModel.mediaPickerMode == .albums
     }
+    
+    // Computed property to disable fullscreen preview for single selection
+    var cameraSelectionParameters: MediaPickerParameters? {
+        var params = mediaPickerSelectionParameters ?? MediaPickerParameters()
+        
+        // Disable fullscreen preview for single selection (both camera and photo library)
+        if params.selectionLimit == nil || params.selectionLimit == 1 {
+            params.showFullscreenPreview = false
+        }
+        
+        return params
+    }
 
     var body: some View {
         ZStack {
@@ -49,9 +61,15 @@ struct AttachmentsEditor<InputViewContent: View>: View {
 
     var mediaPicker: some View {
         GeometryReader { g in
-            MediaPicker(isPresented: $inputViewModel.showPicker) {
-                seleсtedMedias = $0
-                assembleSelectedMedia()
+            MediaPicker(isPresented: $inputViewModel.showPicker) { medias in
+                // Store media immediately when selected, before picker dismisses
+                seleсtedMedias = medias
+                
+                // Assemble with a small delay to ensure media objects are stable
+                // This prevents crashes when picker dismisses too quickly
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    assembleSelectedMedia()
+                }
             } albumSelectionBuilder: { _, albumSelectionView, _ in
                 VStack {
                     albumSelectionHeaderView
@@ -77,12 +95,13 @@ struct AttachmentsEditor<InputViewContent: View>: View {
                 .background(mediaPickerTheme.main.pickerBackground.ignoresSafeArea())
             }
             .didPressCancelCamera {
+                inputViewModel.attachments.medias = []
                 inputViewModel.showPicker = false
             }
             .mediaSelectionLimit(1)
             .currentFullscreenMedia($currentFullscreenMedia)
             .showLiveCameraCell()
-            .setSelectionParameters(mediaPickerSelectionParameters)
+            .setSelectionParameters(cameraSelectionParameters)
             .pickerMode($inputViewModel.mediaPickerMode)
             .orientationHandler(orientationHandler)
             .padding(.top)
@@ -92,13 +111,8 @@ struct AttachmentsEditor<InputViewContent: View>: View {
                 assembleSelectedMedia()
             }
             .onChange(of: inputViewModel.showPicker) {
-                let showFullscreenPreview = mediaPickerSelectionParameters?.showFullscreenPreview ?? true
-                let selectionLimit = mediaPickerSelectionParameters?.selectionLimit ?? 1
-
-                if selectionLimit == 1 && !showFullscreenPreview {
-                    assembleSelectedMedia()
-                    inputViewModel.send()
-                }
+                // Picker dismissed - media is already assembled via completion closure
+                // Just let it show in attachment row without auto-sending
             }
             .applyIf(!mediaPickerThemeIsOverridden) {
                 $0.mediaPickerTheme(
@@ -153,6 +167,8 @@ struct AttachmentsEditor<InputViewContent: View>: View {
             HStack {
                 Button {
                     seleсtedMedias = []
+                    currentFullscreenMedia = nil
+                    inputViewModel.attachments.medias = []
                     inputViewModel.showPicker = false
                 } label: {
                     Text(LocalizedStringKey(localization.cancelButtonText))

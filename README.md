@@ -44,18 +44,21 @@
 - Displays your messages with pagination and allows you to create and "send" new messages (sending means calling a closure since user will be the one providing actual API calls)
 - Allows you to pass a custom view builder for messages and input views
 - Has a built-in photo and video library/camera picker for multiple media asset selection
+- **Document picker** for attaching files (PDF, DOC, XLS, etc.) with preview support
+- **Upload progress** indicators for messages and attachments
+- **System messages** for events like "User joined" or date separators
 - Sticker keyboard that integrates with Giphy
 - Can display a fullscreen menu on long press a message cell (automatically shows scroll for big messages)
 - Supports "reply to message" via message menu or through a closure. Remove and edit are **coming soon**
 - This library allows to send the following content in messages in any combination:
     - Arbitrarily styled text with `AttributedString` or markdown
     - Photo/video
+    - Documents (PDF, DOC, XLS, PPT, TXT, etc.)
     - Audio recording
     - Link with preview
     - Gif/Sticker
     **Coming soon:**
     - User's location
-    - Documents
 
 # Usage
 

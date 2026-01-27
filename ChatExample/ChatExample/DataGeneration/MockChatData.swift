@@ -40,12 +40,15 @@ final class MockChatData {
             sender: sender,
             createdAt: date,
             status: sender.isCurrentUser ? .read : nil,
+            messageType: .regular,
             text: shouldGenerateText ? Lorem.sentence(nbWords: Int.random(in: 3...10), useMarkdown: true) : "",
             images: images,
             videos: [],
+            files: [],
             reactions: [],
             recording: nil,
-            replyMessage: nil
+            replyMessage: nil,
+            uploadProgress: nil
         )
     }
 
@@ -87,12 +90,15 @@ final class MockChatData {
             sender: msg.sender,
             createdAt: msg.createdAt,
             status: msg.status,
+            messageType: msg.messageType,
             text: msg.text,
             images: msg.images,
             videos: msg.videos,
+            files: msg.files,
             reactions: msg.reactions + [randomReaction(senders: senders)],
             recording: msg.recording,
-            replyMessage: msg.replyMessage
+            replyMessage: msg.replyMessage,
+            uploadProgress: msg.uploadProgress
         )
     }
 }

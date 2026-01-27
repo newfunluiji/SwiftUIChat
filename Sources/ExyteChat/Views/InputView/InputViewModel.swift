@@ -15,6 +15,7 @@ final class InputViewModel: ObservableObject {
 
     @Published var showGiphyPicker = false
     @Published var showPicker = false
+    @Published var showDocumentPicker = false
     @Published var showLeftView = false
     @Published var attachmentsMode = AttachmentsMode.photos
     @Published var mediaPickerMode = MediaPickerMode.photos
@@ -51,6 +52,7 @@ final class InputViewModel: ObservableObject {
         DispatchQueue.main.async { [weak self] in
             self?.showPicker = false
             self?.showGiphyPicker = false
+            self?.showDocumentPicker = false
             self?.text = ""
             self?.saveEditingClosure = nil
             self?.attachments = InputViewAttachments()
@@ -65,6 +67,61 @@ final class InputViewModel: ObservableObject {
             await recordingPlayer?.reset()
             sendMessage()
         }
+    }
+    
+    // MARK: - File Attachment Management
+    
+    /// Add files from URLs (from document picker)
+    func addFiles(_ urls: [URL]) {
+        let newFiles = urls.map { FileAttachment(fileURL: $0) }
+        attachments.files.append(contentsOf: newFiles)
+        validateDraft()
+    }
+    
+    /// Add a single file attachment
+    func addFile(_ file: FileAttachment) {
+        attachments.files.append(file)
+        validateDraft()
+    }
+    
+    /// Remove file attachment by ID
+    func removeFile(id: String) {
+        attachments.files.removeAll { $0.id == id }
+        validateDraft()
+    }
+    
+    /// Remove file attachment at index
+    func removeFile(at index: Int) {
+        guard index < attachments.files.count else { return }
+        attachments.files.remove(at: index)
+        validateDraft()
+    }
+    
+    /// Clear all file attachments
+    func clearFiles() {
+        attachments.files.removeAll()
+        validateDraft()
+    }
+    
+    // MARK: - Media Attachment Management
+    
+    /// Remove media attachment by ID (UUID string)
+    func removeMedia(id: String) {
+        attachments.medias.removeAll { $0.id.uuidString == id }
+        validateDraft()
+    }
+    
+    /// Remove media attachment at index
+    func removeMedia(at index: Int) {
+        guard index < attachments.medias.count else { return }
+        attachments.medias.remove(at: index)
+        validateDraft()
+    }
+    
+    /// Clear all media attachments
+    func clearMedias() {
+        attachments.medias.removeAll()
+        validateDraft()
     }
 
     func edit(_ closure: @escaping (String) -> Void) {
@@ -94,8 +151,7 @@ final class InputViewModel: ObservableObject {
             attachmentsMode = .camera
             showPicker = true
         case .document:
-            attachmentsMode = .documents
-            showPicker = true
+            showDocumentPicker = true
         case .send:
             send()
         case .recordAudioTap:
@@ -171,10 +227,11 @@ private extension InputViewModel {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             guard state != .editing else { return } // special case
-            if !self.text.isEmpty || !self.attachments.medias.isEmpty {
+            if !self.text.isEmpty || !self.attachments.medias.isEmpty || !self.attachments.files.isEmpty {
                 self.state = .hasTextOrMedia
             } else if self.text.isEmpty,
                       self.attachments.medias.isEmpty,
+                      self.attachments.files.isEmpty,
                       self.attachments.recording == nil {
                 self.state = .empty
             }
@@ -206,9 +263,9 @@ private extension InputViewModel {
     func subscribePicker() {
         $showPicker
             .sink { [weak self] value in
-                if !value {
-                    self?.attachments.medias = []
-                }
+                // Don't clear attachments.medias here - they should only be cleared
+                // on send() or reset(). The AttachmentsEditor manages its own
+                // seleсtedMedias state separately.
             }
             .store(in: &subscriptions)
     }

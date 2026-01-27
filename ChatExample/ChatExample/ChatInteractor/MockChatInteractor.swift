@@ -72,12 +72,15 @@ final actor MockChatInteractor {
                 sender: originalMessage.sender,
                 createdAt: originalMessage.createdAt,
                 status: originalMessage.status,
+                messageType: originalMessage.messageType,
                 text: originalMessage.text,
                 images: originalMessage.images,
                 videos: originalMessage.videos,
+                files: originalMessage.files,
                 reactions: originalMessage.reactions + [reaction],
                 recording: originalMessage.recording,
-                replyMessage: originalMessage.replyMessage
+                replyMessage: originalMessage.replyMessage,
+                uploadProgress: originalMessage.uploadProgress
             )
             print("Setting Reaction")
             self.messages[matchIndex] = newMessage
@@ -117,12 +120,15 @@ final actor MockChatInteractor {
                     sender: originalMessage.sender,
                     createdAt: originalMessage.createdAt,
                     status: originalMessage.status,
+                    messageType: originalMessage.messageType,
                     text: originalMessage.text,
                     images: originalMessage.images,
                     videos: originalMessage.videos,
+                    files: originalMessage.files,
                     reactions: reactions,
                     recording: originalMessage.recording,
-                    replyMessage: originalMessage.replyMessage
+                    replyMessage: originalMessage.replyMessage,
+                    uploadProgress: originalMessage.uploadProgress
                 )
 
                 self.messages[matchIndex] = newMessage
@@ -157,7 +163,8 @@ private extension MockChatInteractor {
         defer {
             lastDate = lastDate.addingTimeInterval(-(60*60*24))
         }
-        return (0...10)
+        
+        var messages: [MockMessage] = (0...10)
             .map { index in
                 // Generate a random message
                 var msg = chatData.randomMessage(senders: senders, date: lastDate.randomTime())
@@ -166,9 +173,17 @@ private extension MockChatInteractor {
                 // Return the message
                 return msg
             }
-            .sorted { lhs, rhs in
-                lhs.createdAt < rhs.createdAt
-            }
+        
+        // Add a system message at the beginning to demonstrate the feature
+        let systemMessage = MockMessage.systemMessage(
+            text: "Welcome to the conversation!",
+            date: lastDate.addingTimeInterval(-3600) // 1 hour before the first message
+        )
+        messages.insert(systemMessage, at: 0)
+        
+        return messages.sorted { lhs, rhs in
+            lhs.createdAt < rhs.createdAt
+        }
     }
 
     func generateNewMessage() {
@@ -206,12 +221,15 @@ extension MockChatInteractor {
             sender: user,
             createdAt: draftMessage.createdAt,
             status: user.isCurrentUser ? status : nil,
+            messageType: .regular,
             text: draftMessage.text,
             images: await makeMockImages(draftMessage),
             videos: await makeMockVideos(draftMessage),
+            files: makeMockFiles(draftMessage),
             reactions: [],
             recording: draftMessage.recording,
-            replyMessage: draftMessage.replyMessage
+            replyMessage: draftMessage.replyMessage,
+            uploadProgress: nil
         )
     }
 
@@ -241,5 +259,17 @@ extension MockChatInteractor {
             .map { media, thumb, full in
                 MockVideo(id: media.id.uuidString, thumbnail: thumb!, full: full!)
             }
+    }
+    
+    func makeMockFiles(_ draftMessage: ExyteChat.DraftMessage) -> [MockFile] {
+        draftMessage.files.map { fileAttachment in
+            MockFile(
+                id: fileAttachment.id,
+                url: fileAttachment.url,
+                fileName: fileAttachment.fileName,
+                fileSize: fileAttachment.fileSize,
+                mimeType: fileAttachment.mimeType
+            )
+        }
     }
 }
