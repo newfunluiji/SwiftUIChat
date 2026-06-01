@@ -86,6 +86,9 @@ struct MessageView: View {
     }
 
     var showAvatar: Bool {
+        if tapAvatarClosure != nil {
+            return !message.user.isCurrentUser
+        }
         isDisplayingMessageMenu
         || positionInUserGroup == .single
         || (chatType == .conversation && positionInUserGroup == .last)
@@ -104,9 +107,9 @@ struct MessageView: View {
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 0) {
-//            if !message.user.isCurrentUser {
-//                avatarView
-//            }
+            if !message.user.isCurrentUser, tapAvatarClosure != nil {
+                avatarView
+            }
 
             VStack(alignment: message.user.isCurrentUser ? .trailing : .leading, spacing: 2) {
                 if !isDisplayingMessageMenu, let reply = message.replyMessage?.toMessage() {
