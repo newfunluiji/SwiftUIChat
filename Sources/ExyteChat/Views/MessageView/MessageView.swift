@@ -89,7 +89,7 @@ struct MessageView: View {
         if tapAvatarClosure != nil {
             return !message.user.isCurrentUser
         }
-        isDisplayingMessageMenu
+        return isDisplayingMessageMenu
         || positionInUserGroup == .single
         || (chatType == .conversation && positionInUserGroup == .last)
         || (chatType == .comments && positionInUserGroup == .first)
