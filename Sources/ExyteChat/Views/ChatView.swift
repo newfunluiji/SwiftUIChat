@@ -11,7 +11,7 @@ import ExyteMediaPicker
 import FilePicker
 
 
-public typealias MediaPickerParameters = SelectionParamsHolder
+public typealias MediaPickerParameters = SelectionParameters
 
 public enum ChatType: CaseIterable, Sendable {
     case conversation // the latest message is at the bottom, new messages appear from the bottom

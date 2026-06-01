@@ -22,32 +22,37 @@ public struct SystemMessageView: View {
     
     public var body: some View {
         VStack(spacing: 4) {
-            HStack {
-                line
+            VStack(spacing: 8) {
+//                line
                 
                 Text(text)
                     .font(.caption)
                     .foregroundColor(theme.colors.statusGray)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity)
+                    .layoutPriority(1)
                 
-                line
+//                line
             }
+            .frame(maxWidth: .infinity)
             .padding(.horizontal, 16)
             
-            if let date = date {
-                Text(DateFormatter.timeFormatter.string(from: date))
-                    .font(.caption2)
-                    .foregroundColor(theme.colors.statusGray.opacity(0.7))
-            }
+//            if let date = date {
+//                Text(DateFormatter.timeFormatter.string(from: date))
+//                    .font(.caption2)
+//                    .foregroundColor(theme.colors.statusGray.opacity(0.7))
+//            }
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, 4)
+        .frame(maxWidth: .infinity)
     }
     
     private var line: some View {
         Rectangle()
             .fill(theme.colors.statusGray.opacity(0.3))
             .frame(height: 1)
+            .frame(minWidth: 8, maxWidth: .infinity)
     }
 }
 

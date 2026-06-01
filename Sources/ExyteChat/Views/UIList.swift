@@ -562,22 +562,27 @@ struct UIList<MessageContent: View, InputView: View>: UIViewRepresentable {
 
             let row = sections[indexPath.section].rows[indexPath.row]
             tableViewCell.contentConfiguration = UIHostingConfiguration {
-                ChatMessageView(
-                    viewModel: viewModel, messageBuilder: messageBuilder, row: row, chatType: type,
-                    avatarSize: avatarSize, tapAvatarClosure: tapAvatarClosure,
-                    messageStyler: messageStyler, isDisplayingMessageMenu: false,
-                    showMessageTimeView: showMessageTimeView,
-                    messageLinkPreviewLimit: messageLinkPreviewLimit, messageFont: messageFont
-                )
-                .transition(.scale)
-                .background(MessageMenuPreferenceViewSetter(id: row.id))
-                .rotationEffect(Angle(degrees: (type == .conversation ? 180 : 0)))
-                .applyIf(showMessageMenuOnLongPress) {
-                    $0.onLongPressGesture {
-                        // Trigger haptic feedback
-                        self.impactGenerator.impactOccurred()
-                        // Launch the message menu
-                        self.viewModel.messageMenuRow = row
+                if row.message.isSystemMessage, case .system(let systemText) = row.message.messageType {
+                    SystemMessageView(text: systemText, date: row.message.createdAt)
+                        .rotationEffect(Angle(degrees: (type == .conversation ? 180 : 0)))
+                } else {
+                    ChatMessageView(
+                        viewModel: viewModel, messageBuilder: messageBuilder, row: row, chatType: type,
+                        avatarSize: avatarSize, tapAvatarClosure: tapAvatarClosure,
+                        messageStyler: messageStyler, isDisplayingMessageMenu: false,
+                        showMessageTimeView: showMessageTimeView,
+                        messageLinkPreviewLimit: messageLinkPreviewLimit, messageFont: messageFont
+                    )
+                    .transition(.scale)
+                    .background(MessageMenuPreferenceViewSetter(id: row.id))
+                    .rotationEffect(Angle(degrees: (type == .conversation ? 180 : 0)))
+                    .applyIf(showMessageMenuOnLongPress) {
+                        $0.onLongPressGesture {
+                            // Trigger haptic feedback
+                            self.impactGenerator.impactOccurred()
+                            // Launch the message menu
+                            self.viewModel.messageMenuRow = row
+                        }
                     }
                 }
             }

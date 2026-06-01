@@ -101,7 +101,7 @@ struct AttachmentsEditor<InputViewContent: View>: View {
             .mediaSelectionLimit(1)
             .currentFullscreenMedia($currentFullscreenMedia)
             .showLiveCameraCell()
-            .setSelectionParameters(cameraSelectionParameters)
+//            .setSelectionParameters(cameraSelect ionParameters)
             .pickerMode($inputViewModel.mediaPickerMode)
             .orientationHandler(orientationHandler)
             .padding(.top)
