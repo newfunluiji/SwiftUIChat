@@ -65,9 +65,14 @@ struct UIList<MessageContent: View, InputView: View>: UIViewRepresentable {
 
         NotificationCenter.default.addObserver(forName: .onScrollToBottom, object: nil, queue: nil) { _ in
             DispatchQueue.main.async {
-                if !context.coordinator.sections.isEmpty {
-                    tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .bottom, animated: true)
-                }
+                // Validate against the table's own state, not coordinator.sections: scrollToRow
+                // checks the data source's row counts. Guard against (a) the table being offscreen
+                // (window == nil) which logs "layout outside view hierarchy", and (b) section 0
+                // having 0 rows during a transient/empty update, which traps scrollToRow.
+                guard tableView.window != nil,
+                      tableView.numberOfSections > 0,
+                      tableView.numberOfRows(inSection: 0) > 0 else { return }
+                tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .bottom, animated: true)
             }
         }
 
