@@ -798,3 +798,132 @@ public extension ChatView {
 //        self.ids = messages.map { $0.id }
 //    }
 //}
+
+// These initializers are kept in this file, alongside the `@State` property
+// declarations they don't explicitly assign. Xcode 27's Swift 6.4 compiler emits an
+// unresolvable "variable initialization expression" linker symbol for a `@State`
+// property's default value when its type's initializer lives in a different file
+// (https://github.com/swiftlang/swift/issues/91700). They were previously declared in
+// PartialTemplateSpecifications.swift.
+public extension ChatView where MessageContent == EmptyView {
+
+    init(messages: [Message],
+         chatType: ChatType = .conversation,
+         replyMode: ReplyMode = .quote,
+         didSendMessage: @escaping (DraftMessage) -> Void,
+         reactionDelegate: ReactionDelegate? = nil,
+         inputViewBuilder: @escaping InputViewBuilderClosure,
+         messageMenuAction: MessageMenuActionClosure?) {
+        self.type = chatType
+        self.didSendMessage = didSendMessage
+        self.reactionDelegate = reactionDelegate
+        self.sections = ChatView.mapMessages(messages, chatType: chatType, replyMode: replyMode)
+        self.ids = messages.map { $0.id }
+        self.inputViewBuilder = inputViewBuilder
+        self.messageMenuAction = messageMenuAction
+    }
+}
+
+public extension ChatView where InputViewContent == EmptyView {
+
+    init(messages: [Message],
+         chatType: ChatType = .conversation,
+         replyMode: ReplyMode = .quote,
+         didSendMessage: @escaping (DraftMessage) -> Void,
+         reactionDelegate: ReactionDelegate? = nil,
+         messageBuilder: @escaping MessageBuilderClosure,
+         messageMenuAction: MessageMenuActionClosure?) {
+        self.type = chatType
+        self.didSendMessage = didSendMessage
+        self.reactionDelegate = reactionDelegate
+        self.sections = ChatView.mapMessages(messages, chatType: chatType, replyMode: replyMode)
+        self.ids = messages.map { $0.id }
+        self.messageBuilder = messageBuilder
+        self.messageMenuAction = messageMenuAction
+    }
+}
+
+public extension ChatView where MenuAction == DefaultMessageMenuAction {
+
+    init(messages: [Message],
+         chatType: ChatType = .conversation,
+         replyMode: ReplyMode = .quote,
+         didSendMessage: @escaping (DraftMessage) -> Void,
+         reactionDelegate: ReactionDelegate? = nil,
+         messageBuilder: @escaping MessageBuilderClosure,
+         inputViewBuilder: @escaping InputViewBuilderClosure) {
+        self.type = chatType
+        self.didSendMessage = didSendMessage
+        self.reactionDelegate = reactionDelegate
+        self.sections = ChatView.mapMessages(messages, chatType: chatType, replyMode: replyMode)
+        self.ids = messages.map { $0.id }
+        self.messageBuilder = messageBuilder
+        self.inputViewBuilder = inputViewBuilder
+    }
+}
+
+public extension ChatView where MessageContent == EmptyView, InputViewContent == EmptyView {
+
+    init(messages: [Message],
+         chatType: ChatType = .conversation,
+         replyMode: ReplyMode = .quote,
+         didSendMessage: @escaping (DraftMessage) -> Void,
+         reactionDelegate: ReactionDelegate? = nil,
+         messageMenuAction: MessageMenuActionClosure?) {
+        self.type = chatType
+        self.didSendMessage = didSendMessage
+        self.reactionDelegate = reactionDelegate
+        self.sections = ChatView.mapMessages(messages, chatType: chatType, replyMode: replyMode)
+        self.ids = messages.map { $0.id }
+        self.messageMenuAction = messageMenuAction
+    }
+}
+
+public extension ChatView where InputViewContent == EmptyView, MenuAction == DefaultMessageMenuAction {
+
+    init(messages: [Message],
+         chatType: ChatType = .conversation,
+         replyMode: ReplyMode = .quote,
+         didSendMessage: @escaping (DraftMessage) -> Void,
+         reactionDelegate: ReactionDelegate? = nil,
+         messageBuilder: @escaping MessageBuilderClosure) {
+        self.type = chatType
+        self.didSendMessage = didSendMessage
+        self.reactionDelegate = reactionDelegate
+        self.sections = ChatView.mapMessages(messages, chatType: chatType, replyMode: replyMode)
+        self.ids = messages.map { $0.id }
+        self.messageBuilder = messageBuilder
+    }
+}
+
+public extension ChatView where MessageContent == EmptyView, MenuAction == DefaultMessageMenuAction {
+
+    init(messages: [Message],
+         chatType: ChatType = .conversation,
+         replyMode: ReplyMode = .quote,
+         didSendMessage: @escaping (DraftMessage) -> Void,
+         reactionDelegate: ReactionDelegate? = nil,
+         inputViewBuilder: @escaping InputViewBuilderClosure) {
+        self.type = chatType
+        self.didSendMessage = didSendMessage
+        self.reactionDelegate = reactionDelegate
+        self.sections = ChatView.mapMessages(messages, chatType: chatType, replyMode: replyMode)
+        self.ids = messages.map { $0.id }
+        self.inputViewBuilder = inputViewBuilder
+    }
+}
+
+public extension ChatView where MessageContent == EmptyView, InputViewContent == EmptyView, MenuAction == DefaultMessageMenuAction {
+
+    init(messages: [Message],
+         chatType: ChatType = .conversation,
+         replyMode: ReplyMode = .quote,
+         didSendMessage: @escaping (DraftMessage) -> Void,
+         reactionDelegate: ReactionDelegate? = nil) {
+        self.type = chatType
+        self.didSendMessage = didSendMessage
+        self.reactionDelegate = reactionDelegate
+        self.sections = ChatView.mapMessages(messages, chatType: chatType, replyMode: replyMode)
+        self.ids = messages.map { $0.id }
+    }
+}
