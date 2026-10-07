@@ -116,6 +116,7 @@ public struct ChatView<MessageContent: View, InputViewContent: View, MenuAction:
     var isScrollEnabled: Bool = true
     var avatarSize: CGFloat = 32
     var showUploadFilesView: Bool = false
+    var isInputDisabled: Bool = false
     var messageStyler: (String) -> AttributedString = AttributedString.init
     var showMessageMenuOnLongPress: Bool = true
     var messageMenuAnimationDuration: Double = 0.3
@@ -424,6 +425,13 @@ public struct ChatView<MessageContent: View, InputViewContent: View, MenuAction:
                 )
             }
         }
+        .disabled(isInputDisabled)
+        .opacity(isInputDisabled ? 0.5 : 1)
+        .onChange(of: isInputDisabled) { _, isDisabled in
+            if isDisabled {
+                globalFocusState.focus = nil
+            }
+        }
         .sizeGetter($inputViewSize)
         .environmentObject(globalFocusState)
         .onAppear(perform: inputViewModel.onStart)
@@ -655,6 +663,14 @@ public extension ChatView {
         var view = self
         view.chatTitle = title
         return view.modifier(ChatNavigationModifier(title: title, status: status, cover: cover, hasBack: hasBackButton))
+    }
+
+    /// Disables the whole input area (text field, attachments, send) and dismisses the keyboard,
+    /// e.g. while the user must answer a prompt before writing. Works for custom input views too.
+    func inputDisabled(_ isDisabled: Bool) -> ChatView {
+        var view = self
+        view.isInputDisabled = isDisabled
+        return view
     }
 
     // makes sense only for built-in message view
